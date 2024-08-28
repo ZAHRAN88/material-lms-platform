@@ -56,9 +56,9 @@ const ProgressButton = ({
       {isLoading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : completionStatus ? (
-        <div className="flex items-center">
-          <CheckCircle className="h-4 w-4 mr-2" />
-          <span>Completed</span>
+        <div className="flex items-center dark:bg ">
+          <CheckCircle className="h-4 w-4 mr-2 dark:text-white" />
+          <span className="dark:text-white">Completed</span>
         </div>
       ) : (
         "Mark as complete"
