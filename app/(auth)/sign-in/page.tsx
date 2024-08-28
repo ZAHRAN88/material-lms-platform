@@ -10,6 +10,10 @@ import { z } from 'zod';
 import { signIn } from '@/app/actions';
 import { useAuth } from '@/lib/AuthContext';
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+
 // Define the schema for form validation
 const signInSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -52,98 +56,58 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="absolute top-0 left-0 w-full h-full bg-black -z-10">
-        <Image
-          src="/hero-bg.jpg"
-          alt="Background Image"
-          layout="fill"
-          objectFit="cover"
-          className="opacity-50"
-        />
+    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8  relative">
+      <div className="absolute top-0 left-0 w-full h-full -z-10">
+       
       </div>
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to Your Material LMS
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Access your personalized learning experience
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
+      <div className="text-center mb-8 z-10">
+        <h1 className="text-4xl font-bold dark:text-white text-black mb-2">Welcome to Your Material LMS!</h1>
+        <p className=" dark:text-white text-slate-400">Sign in to access your personalized learning experience.</p>
+      </div>
+      <Card className="w-full max-w-md dark:bg-gray-900 bg-white text-white">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl dark:text-white text-black font-bold text-center">Sign in to Material</CardTitle>
+          {/* <CardDescription className="text-center text-gray-400">
+            Welcome back! Please sign in to continue
+          </CardDescription> */}
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                id="email"
                 {...register('email')}
                 type="email"
-                autoComplete="email"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
+                className="bg-gray-800 border-gray-700 text-white"
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
+            <div className="space-y-2">
+              <Input
                 id="password"
                 {...register('password')}
                 type="password"
-                autoComplete="current-password"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
+                className="bg-gray-800 border-gray-700 text-white"
               />
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
             </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot your password?
-              </a>
-            </div>
-          </div>
-
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              disabled={isLoading}
-            >
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
-        <div className="text-sm text-center">
-          Don&apos;t have an account?{' '}
-          <Link href="/sign-up" className="font-medium text-indigo-600 hover:text-indigo-500">
-            Sign up
-          </Link>
-        </div>
-      </div>
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter>
+          <p className="text-sm text-center w-full text-gray-400">
+            Don&apos;t have an account?{' '}
+            <Link href="/sign-up" className="text-blue-400 hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
