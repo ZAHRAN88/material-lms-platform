@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mongodb"
+  url          = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Course {
+  id           String   @id @default(cuid()) @map("_id")
+  instructorId String
+  title        String  
+  subtitle     String? 
+  description  String? 
+  imageUrl     String? 
+  price        Float?
+  isPublished  Boolean @default(true)
+  isFree      Boolean @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  subCategoryId String
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+
+  levelId String?
+  level   Level?  @relation(fields: [levelId], references: [id])
+
+  sections Section[]
+
+  purchases Purchase[]
+
+  instructor   User     @relation(fields: [instructorId], references: [id])
+  User         User?    @relation("InstructorCourses", fields: [instructorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  @@index([categoryId])
+  @@index([subCategoryId])
+  @@index([levelId])
+}
+
+model Category {
+  id            String        @id @default(uuid()) @map("_id")
+  name          String        @unique
+  subCategories SubCategory[]
+  courses       Course[]
+}
+
+model SubCategory {
+  id   String @id @default(uuid()) @map("_id")
+  name String
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  courses Course[]
+
+  @@index([categoryId])
+}
+
+model Level {
+  id      String   @id @default(uuid()) @map("_id")
+  name    String   @unique
+  courses Course[]
+}
+
+model Section {
+  id          String  @id @default(uuid()) @map("_id")
+  title       String
+  description String? 
+  videoUrl    String? 
+  position    Int
+  isPublished Boolean @default(true)
+  isFree      Boolean @default(false)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  muxData MuxData?
+
+  resources Resource[]
+
+  progress Progress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([courseId])
+}
+
+model MuxData {
+  id         String  @id @default(uuid()) @map("_id")
+  assetId    String
+  playbackId String?
+
+  sectionId String  @unique
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+ 
+}
+
+model Resource {
+  id      String @id @default(uuid()) @map("_id")
+  name    String
+  fileUrl String
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([sectionId])
+}
+
+model Progress {
+  id        String @id @default(uuid()) @map("_id")
+  studentId String 
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  isCompleted Boolean @default(false)
+
+  user   User   @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([sectionId])
+  @@unique([studentId, sectionId])
+}
+
+model Purchase {
+  id         String @id @default(uuid()) @map("_id")
+  customerId String 
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  user   User   @relation(fields: [customerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([courseId])
+  @@unique([customerId, courseId])
+}
+
+model StripeCustomer {
+  id               String @id @default(uuid()) @map("_id")
+  customerId       String @unique
+  stripeCustomerId String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+model Admins {
+  id               String @id @default(uuid()) @map("_id")
+  ID String
+ 
+}
+model Engineer {
+  id     String    @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  times  TimeSlot[]
+}
+
+model TimeSlot {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  day        String
+  time       String
+  place      String
+  engineer   Engineer  @relation(fields: [engineerId], references: [id])
+  engineerId String    @db.ObjectId
+}
+
+model User {
+  id        String   @id @default(cuid()) @map("_id")
+  name      String?
+  email     String   @unique
+  password  String
+  role Role @default(USER)
+  // ... other fields
+
+  instructorCourses Course[] @relation("InstructorCourses")
+  enrolledCourses   Course[]
+
+  Purchase Purchase[]
+
+  Progress Progress[]
+}
+
+enum Role {
+  USER
+  INSTRUCTOR
+  ADMIN
+  MASTER
+}
+
