@@ -51,7 +51,8 @@ const PurchasedCourses = async () => {
 	}
 
 	return (
-		<>
+		<div className="flex flex-col gap-2 justify-center items-center   ">
+			<Header/>
 			{purchasedCourses.map((purchase, index) => (
 				<MotionDiv
 					key={purchase.course.id}
@@ -60,7 +61,7 @@ const PurchasedCourses = async () => {
 					<CourseCard course={purchase.course} />
 				</MotionDiv>
 			))}
-		</>
+		</div>
 	);
 };
 
