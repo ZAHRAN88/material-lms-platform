@@ -65,12 +65,22 @@ const EngineerTimesServer = async () => {
   console.log(engineers[0]?.times); // For debugging
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col gap-3 items-center justify-center">
       <div className="text-xl font-bold">
       <TextEffect per="char" preset="fade">
         {`Check your schedule here`}
       </TextEffect>
+      
+
       </div>
+      <div dir="rtl" className="text-sm font-bold text-red-500">
+      <TextEffect per='word' as='p' preset='blur'>
+      {`المواعيد  لسنة  تالتة  بس`}
+    </TextEffect>
+      
+
+      </div>
+
       <Card className="w-full max-w-2xl mx-auto mt-10 ">
         <CardContent className="p-6">
           <EngineerTimesClient engineers={engineers}  />

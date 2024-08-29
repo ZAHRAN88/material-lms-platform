@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { Suspense } from "react";
 import CourseCard from "@/components/courses/CourseCard";
 import CourseSkeleton from "@/components/courses/CourseSkeleton";
@@ -9,6 +10,25 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getUserFromToken } from "@/app/actions";
 
+const getCachedPurchasedCourses = unstable_cache(
+	async (userId: string) => await db.purchase.findMany({
+		where: { customerId: userId },
+		select: {
+			course: {
+				include: {
+					category: true,
+					subCategory: true,
+					sections: {
+						where: { isPublished: true },
+					},
+				},
+			},
+		},
+	}),
+	['purchased-courses'],
+	{ revalidate: 3600 } // Cache for 1 hour
+);
+
 const PurchasedCourses = async () => {
 	const user = await getUserFromToken();
 
@@ -16,24 +36,7 @@ const PurchasedCourses = async () => {
 		return redirect("/sign-in");
 	}
 
-	const purchasedCourses = await db.purchase.findMany({
-		where: {
-			customerId: user.id,
-		},
-		select: {
-			course: {
-				include: {
-					category: true,
-					subCategory: true,
-					sections: {
-						where: {
-							isPublished: true,
-						},
-					},
-				},
-			},
-		},
-	});
+	const purchasedCourses = await getCachedPurchasedCourses(user.id);
 
 	if (purchasedCourses.length === 0) {
 		return (

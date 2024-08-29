@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { db } from "@/lib/db";
 import getCoursesByCategory from "../actions/getCourses";
 import Categories from "@/components/custom/Categories";
@@ -7,8 +8,31 @@ import { MotionDiv } from "@/components/MotionDiv";
 import { Suspense } from "react";
 import Link from "next/link";
 
+const getCachedCourses = unstable_cache(
+  async () => await getCoursesByCategory(null),
+  ['courses'],
+  { revalidate: 3600 } // Cache for 1 hour
+);
+
+const getCachedCategories = unstable_cache(
+  async () => await db.category.findMany({
+    orderBy: {
+      name: "asc",
+    },
+    include: {
+      subCategories: {
+        orderBy: {
+          name: "asc",
+        },
+      },
+    },
+  }),
+  ['categories'],
+  { revalidate: 3600 } // Cache for 1 hour
+);
+
 const CourseList = async () => {
-  const courses = await getCoursesByCategory(null);
+  const courses = await getCachedCourses();
 
   if (courses.length === 0) {
     return (
@@ -46,18 +70,7 @@ const LoadingSkeleton = () => (
 );
 
 export default async function Home() {
-  const categories = await db.category.findMany({
-    orderBy: {
-      name: "asc",
-    },
-    include: {
-      subCategories: {
-        orderBy: {
-          name: "asc",
-        },
-      },
-    },
-  });
+  const categories = await getCachedCategories();
 
   return (
     <div className="md:mt-5 md:px-10 xl:px-16 pb-16">

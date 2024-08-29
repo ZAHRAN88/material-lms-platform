@@ -12,11 +12,19 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 
-// Define the schema for form validation
 const signUpSchema = z.object({
-  name: z.string().min(4, 'Name must be at least 4 characters').max(20, 'Name must be at most 20 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(20, 'Password must be at most 20 characters'),
+  name: z.string()
+    .min(4, 'Name must be at least 4 characters')
+    .max(20, 'Name must be at most 20 characters')
+    .regex(/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces'),
+  email: z.string()
+    .email('Invalid email address')
+    .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(20, 'Password must be at most 20 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",

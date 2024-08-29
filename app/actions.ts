@@ -176,3 +176,26 @@ export async function getInstructorCourses(instructorId: string) {
 		}
 	});
 }
+
+
+export async function getCommunities() {
+	return db.community.findMany({
+		include: {
+			_count: {
+				select: { members: true }
+			}
+		}
+	});
+}
+
+export async function getRecentDiscussions() {
+	return db.discussion.findMany({
+		take: 10,
+		orderBy: { createdAt: 'desc' },
+		include: {
+			author: {
+				select: { name: true }
+			}
+		}
+	});
+}
