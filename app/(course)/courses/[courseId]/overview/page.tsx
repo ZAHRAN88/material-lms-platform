@@ -7,6 +7,7 @@ import ReadText from "@/components/custom/ReadText";
 import SectionMenu from "@/components/layout/SectionMenu";
 import { MotionDiv, MotionP } from "@/components/MotionDiv";
 import { getUserFromToken } from "@/app/actions";
+import { Clock, Book, User } from "lucide-react"; // Import icons
 
 const LoadingSkeleton = () => (
   <div className="px-6 py-4 flex flex-col gap-5 animate-pulse">
@@ -65,49 +66,48 @@ const CourseOverview = async ({ params }: { params: { courseId: string } }) => {
   return (
     <Suspense fallback={<LoadingSkeleton />}>
       <MotionDiv
-        initial={{ opacity: 0, y: -100 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="px-6 py-4 flex flex-col gap-5 text-sm"
+        className="px-6 py-8 flex flex-col w-[90%] mt-4 h-screen mx-auto gap-6 text-sm bg-white dark:bg-gray-800 rounded-lg shadow-md"
       >
-        <div className="flex justify-between">
-          <h1 className="text-2xl font-bold">{course.title}</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{course.title}</h1>
           <SectionMenu course={course} />
         </div>
 
         <MotionP
-          initial={{ opacity: 0, y: -100 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="font-medium"
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-lg text-gray-600 dark:text-gray-300"
         >
           {course.subtitle}
         </MotionP>
 
-        <div className="flex gap-2 items-center">
-          <Image
-            src="/avatar_placeholder.jpg"
-            alt={`${course.instructor.name}'s photo`}
-            width={30}
-            height={30}
-            className="rounded-full"
-          />
-          <p className="font-bold">Instructor:</p>
-          <p>{course.instructor.name}</p>
-        </div>
-
-        <div className="flex gap-2">
-          <p className="font-bold">Level:</p>
-          <p>{level?.name}</p>
+        <div className="flex flex-wrap gap-6 text-gray-700 dark:text-gray-300">
+          <div className="flex items-center gap-2">
+            <User className="w-5 h-5" />
+            <p className="font-medium">Instructor: <span className="font-normal">{course.instructor.name}</span></p>
+          </div>
+          {level && (
+            <div className="flex items-center gap-2">
+              <Book className="w-5 h-5" />
+              <p className="font-medium">Level: <span className="font-normal">{level.name}</span></p>
+            </div>
+          )}
+          
         </div>
 
         {course.description ? (
-          <div className="flex flex-col gap-2">
-            <p className="font-bold">Description:</p>
-            <ReadText value={course.description} />
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Description:</h2>
+            <div className="prose dark:prose-invert">
+              <ReadText value={course.description} />
+            </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center font-bold">
+          <div className="flex items-center justify-center font-medium text-gray-500 dark:text-gray-400 mt-4">
             <p>Description is not provided.</p>
           </div>
         )}

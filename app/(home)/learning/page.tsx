@@ -8,6 +8,7 @@ import { MotionDiv } from "@/components/MotionDiv";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getUserFromToken } from "@/app/actions";
+
 const PurchasedCourses = async () => {
 	const user = await getUserFromToken();
 
@@ -36,43 +37,43 @@ const PurchasedCourses = async () => {
 
 	if (purchasedCourses.length === 0) {
 		return (
-			<div className="w-full text-center py-10">
-				<p className="text-2xl font-semibold text-slate-600 mb-4">
+			<div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center px-4">
+				<h2 className="text-2xl font-semibold text-slate-700 mb-4">
 					No courses enrolled yet
-				</p>
-				<p className="text-slate-500 mb-6">
+				</h2>
+				<p className="text-slate-500 mb-6 max-w-md">
 					Explore our course catalog and start your learning journey today!
 				</p>
 				<Link href="/">
-					<Button>Browse Courses</Button>
+					<Button size="lg">Browse Courses</Button>
 				</Link>
 			</div>
 		);
 	}
 
 	return (
-		<div className="flex flex-col gap-2 justify-center items-center   ">
-			<Header/>
-			{purchasedCourses.map((purchase, index) => (
-				<MotionDiv
-					key={purchase.course.id}
-					className="border rounded-lg shadow-sm cursor-pointer overflow-hidden group hover:translate-y-3 hover:shadow-md transition-all ease-in-out duration-300 delay-75"
-				>
-					<CourseCard course={purchase.course} />
-				</MotionDiv>
-			))}
+		<div className="space-y-8">
+			<Header />
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+				{purchasedCourses.map((purchase) => (
+					<MotionDiv
+						key={purchase.course.id}
+						className="group hover:translate-y-[-5px] transition-all duration-300 ease-in-out"
+					>
+						<CourseCard course={purchase.course} />
+					</MotionDiv>
+				))}
+			</div>
 		</div>
 	);
 };
 
 const LoadingSkeleton = () => (
-	<>
+	<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 		{[...Array(4)].map((_, index) => (
-			<div key={index} className="w-72">
-				<CourseSkeleton />
-			</div>
+			<CourseSkeleton key={index} />
 		))}
-	</>
+	</div>
 );
 
 const LearningPage = async () => {
@@ -83,14 +84,10 @@ const LearningPage = async () => {
 	}
 
 	return (
-		<div className="flex flex-col gap-2 justify-center items-center px-4 py-6 md:mt-5 md:px-10 xl:px-16">
-
-			
-			<div className="flex items-center justify-center flex-wrap gap-7 mt-7">
-				<Suspense fallback={<LoadingSkeleton />}>
-					<PurchasedCourses />
-				</Suspense>
-			</div>
+		<div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+			<Suspense fallback={<LoadingSkeleton />}>
+				<PurchasedCourses />
+			</Suspense>
 		</div>
 	);
 };

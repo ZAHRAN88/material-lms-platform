@@ -20,7 +20,7 @@ const isAdmin = user?.role === "ADMIN";
       <div className="flex-1 flex">
         <Sidebar />
         {isAdmin && (
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 rounded-lg">{children}</div>
         )}
       </div>
       {!isAdmin && (

@@ -80,142 +80,146 @@ const EditSectionForm = ({
   };
 
   return (
-    <>
-      <div className="flex flex-col gap-2 sm:flex-row sm:justify-between mb-7">
+    <div className=" w-full mx-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between mb-8">
         <Link href={`/instructor/courses/${courseId}/sections`}>
-          <Button variant="outline" className="text-sm font-medium">
+          <Button variant="ghost" className="text-sm font-medium">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Weeks
           </Button>
         </Link>
 
-        <div className="flex gap-5 items-start">
-          <PublishButton
+        <div className="flex gap-3 items-center">
+          {/* <PublishButton
             disabled={!isCompleted}
             courseId={courseId}
             sectionId={section.id}
             isPublished={section.isPublished}
             page="Section"
-          />
+          /> */}
           <Delete item="section" courseId={courseId} sectionId={section.id} />
         </div>
       </div>
 
-      <h1 className="text-xl font-bold">Section Details</h1>
-      <p className="text-sm font-medium mt-2">
-        Complete this section with detailed information, good video and
-        resources to give your students the best learning experience
-      </p>
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+        <h1 className="text-2xl font-bold mb-2 dark:text-white">Section Details</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+          Complete this section with detailed information, good 
+          resources to give  students the best learning experience
+        </p>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-5">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Title <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ex: Introduction to Web Development"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Description <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <RichEditor
-                    placeholder="What is this section about?"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {section.videoUrl && (
-            <div className="my-5">
-              <MuxPlayer
-                playbackId={section.muxData?.playbackId || ""}
-                className="md:max-w-[600px]"
-              />
-            </div>
-          )}
-          {/* <FormField
-            control={form.control}
-            name="videoUrl"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>
-                  Video <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <FileUpload
-                    value={field.value || ""}
-                    onChange={(url) => field.onChange(url)}
-                    endpoint="sectionVideo"
-                    page="Edit Section"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
-
-          <FormField
-            control={form.control}
-            name="isFree"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <FormLabel>Accessibility</FormLabel>
-                  <FormDescription>
-                    Everyone can access this section for FREE
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <div className="flex gap-5">
-            <Link href={`/instructor/courses/${courseId}/sections`}>
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-            </Link>
-            <Button type="submit" disabled={!isValid || isSubmitting}>
-              {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Save"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Title <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ex: Introduction to Web Development"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
-          </div>
-        </form>
-      </Form>
+            />
 
-      <ResourceForm section={section} courseId={courseId} />
-    </>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Description <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <RichEditor
+                      placeholder="What is this section about?"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {section.videoUrl && (
+              <div className="my-6">
+                <h2 className="text-lg font-semibold mb-2 dark:text-white">Preview Video</h2>
+                <MuxPlayer
+                  playbackId={section.muxData?.playbackId || ""}
+                  className="w-full aspect-video rounded-lg shadow-sm"
+                />
+              </div>
+            )}
+            {/* <FormField
+              control={form.control}
+              name="videoUrl"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>
+                    Video <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <FileUpload
+                      value={field.value || ""}
+                      onChange={(url) => field.onChange(url)}
+                      endpoint="sectionVideo"
+                      page="Edit Section"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+
+            <FormField
+              control={form.control}
+              name="isFree"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Accessibility</FormLabel>
+                    <FormDescription>
+                      Everyone can access this section for FREE
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <div className="flex gap-3 justify-end mt-8">
+              <Link href={`/instructor/courses/${courseId}/sections`}>
+                <Button variant="outline" type="button">
+                  Cancel
+                </Button>
+              </Link>
+              <Button type="submit" disabled={!isValid || isSubmitting}>
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+        <ResourceForm section={section} courseId={courseId} />
+      </div>
+    </div>
   );
 };
 

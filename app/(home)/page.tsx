@@ -22,11 +22,11 @@ const CourseList = async () => {
   }
 
   return (
-    <div className="flex flex-wrap gap-7 items-center m-auto justify-center">
+    <div className="flex flex-wrap gap-7 items-center m-auto justify-start">
       {courses.map((course) => (
         <MotionDiv
           key={course.id}
-          className="border rounded-lg shadow-sm cursor-pointer overflow-hidden group hover:translate-y-3 hover:shadow-md transition-all ease-in-out duration-300 delay-75"
+          className="border rounded-lg shadow-sm cursor-pointer overflow-hidden justify-start group hover:translate-y-3 hover:shadow-md transition-all ease-in-out duration-300 delay-75"
         >
           <CourseCard course={course} />
         </MotionDiv>

@@ -3,7 +3,7 @@
 import {
   Course,
   MuxData,
-  Progress,
+  Progress as PrismaProgress,
   Purchase,
   Resource,
   Section,
@@ -28,6 +28,7 @@ import { Suspense } from "react";
 import ReadText from "../custom/ReadText";
 import { useAuth } from "@/lib/AuthContext";
 import { enrollCourse } from "@/lib/actions";
+import { Progress } from "../ui/progress";
 
 const LoadingSkeleton = () => (
   <div className="px-6 py-4 flex flex-col gap-5 animate-pulse">
@@ -62,7 +63,7 @@ const SectionsDetails = ({
   purchase: Purchase | null;
   muxData: MuxData | null;
   resources: Resource[];
-  progress: Progress | null;
+  progress: PrismaProgress | null;
   path: string;
 }) => {
   const [isLoading, setIsLoading] = useState(false);

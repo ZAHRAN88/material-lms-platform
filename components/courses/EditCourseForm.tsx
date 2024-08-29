@@ -134,12 +134,12 @@ const EditCourseForm = ({
             
             { duration: 0.5, delay: 0.3 }
                    } className="flex gap-5 items-start">
-          <PublishButton
+          {/* <PublishButton
             disabled={!isCompleted}
             courseId={course.id}
             isPublished={course.isPublished}
             page="Course"
-          />
+          /> */}
           <Delete item="course" courseId={course.id} />
         </MotionDiv>
       </div>
@@ -194,16 +194,24 @@ const EditCourseForm = ({
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>
+              <FormItem className="col-span-full">
+                <FormLabel className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                   Description <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
-                  <RichEditor
-                    placeholder="What is this course about?"
-                    {...field}
-                  />
+                  <div className="mt-2 rounded-md shadow-sm">
+                    <RichEditor
+                      placeholder="What is this course about?"
+                      className="block w-full rounded-md border-0 dark:placeholder:text-gray-400 py-1.5 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                      toolbarClassName="border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+                      editorClassName="prose dark:prose-invert max-w-none min-h-[200px] p-4 focus:outline-none"
+                      {...field}
+                    />
+                  </div>
                 </FormControl>
+                <FormDescription className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  Write a comprehensive description of your course. Include key topics, learning outcomes, and any prerequisites.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

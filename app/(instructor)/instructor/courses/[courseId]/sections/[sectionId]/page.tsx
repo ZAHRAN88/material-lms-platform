@@ -50,11 +50,11 @@ const SectionData = async ({
 
   return (
     <>
-      <AlertBanner
+      {/* <AlertBanner
         isCompleted={isCompleted}
         requiredFieldsCount={requiredFieldsCount}
         missingFieldsCount={missingFieldsCount}
-      />
+      /> */}
       <EditSectionForm
         section={section}
         courseId={params.courseId}

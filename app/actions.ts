@@ -14,32 +14,53 @@ const buyCourse = async (formData: FormData) => {
         }
     })
 }
-const addEngineer = async (formData:FormData)=>{
-    await db.engineer.create({
-        data:{
+type Engineer = {
+    id: string;
+    day: string;
+    time: string;
+    place: string;
+    name: string;
+    times: Time[];
+}
+const addEngineer = async (formData: FormData): Promise<Engineer> => {
+    const engineer = await db.engineer.create({
+        data: {
             name: formData.get('name') as string,
             times: {
-                create: [
-                    {
-                        day: formData.get('day') as string,
-                        time: formData.get('time') as string,
-                        place: formData.get('place') as string,
-                    }
-                ]
+                create: {
+                    day: formData.get('day') as string,
+                    time: formData.get('time') as string,
+                    place: formData.get('place') as string
+                }
             }
-        }
-    })
-    
+        },
+        include: { times: true } // Include the related times
+    });
+
+    return {
+        id: engineer.id,
+        name: engineer.name,
+        day: engineer.times[0].day,
+        time: engineer.times[0].time,
+        place: engineer.times[0].place,
+        times: engineer.times
+    };
 }
-const addTimesToEngineer = async (formData:FormData)=>{
-    await db.timeSlot.create({
-        data:{
+type Time = {
+    day: string;
+    time: string;
+    place: string;
+}
+const addTimesToEngineer = async (formData: FormData): Promise<Time> => {
+    const newTime = await db.timeSlot.create({
+        data: {
             engineerId: formData.get('engineerId') as string,
             day: formData.get('day') as string,
             time: formData.get('time') as string,
             place: formData.get('place') as string
         }
-    })
+    });
+    return newTime;
 }
 const signUp = async (name: string, email: string, password: string) => {
 	try {
