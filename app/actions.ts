@@ -162,3 +162,17 @@ export async function signOut() {
 	cookies().delete('token');
 	return { success: true };
 }
+
+export async function getInstructorCourses(instructorId: string) {
+	return db.course.findMany({
+		where: { instructorId },
+		include: {
+			sections: {
+				include: {
+					progress: true
+				}
+			},
+			purchases: true
+		}
+	});
+}

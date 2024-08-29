@@ -35,7 +35,7 @@ const CourseCard = async ({ course }: { course: Course }) => {
           <CardContent className="p-4">
             <h2 className="text-lg font-bold mb-2 line-clamp-2">{course.title}</h2>
             {instructor && (
-              <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 mb-1 text-sm text-muted-foreground">
                 <User className="w-4 h-4" />
                 <span>{instructor.name}</span>
               </div>

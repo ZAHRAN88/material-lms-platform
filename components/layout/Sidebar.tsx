@@ -1,60 +1,51 @@
 "use client";
 
-import { BarChart4, BotIcon, MonitorPlay, TimerIcon } from "lucide-react";
+import { BarChart4, MonitorPlay, TimerIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Sidebar = () => {
   const pathname = usePathname();
 
   const sidebarRoutes = [
-    { icon: <MonitorPlay />, label: "Courses", path: "/instructor/courses" },
-    {
-      icon: <BarChart4 />,
-      label: "Performance",
-      path: "/instructor/performance",
-    },
-
-    {
-      path: "/mwaead",
-      icon: <TimerIcon className="h-4 w-4" />,
-      label: "mwaead",
-    },
+    { icon: <MonitorPlay className="mr-2 h-4 w-4" />, label: "Courses", path: "/instructor/courses" },
+    { icon: <BarChart4 className="mr-2 h-4 w-4" />, label: "Performance", path: "/instructor/performance" },
+    { icon: <TimerIcon className="mr-2 h-4 w-4" />, label: "mwaead", path: "/development" },
   ];
 
   return (
     <motion.div
-    initial={{ opacity: 0, x: -100 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.8, delay: 0.5,  damping: 10, stiffness: 80, type: "spring" }}
- className="max-sm:hidden flex flex-col h-screen w-64 border-r shadow-md px-3 py-3 rounded-md my-4 gap-4 text-sm font-medium">
-      {sidebarRoutes.map((route, index) => (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ delay: index * 0.3, duration: 0.5, ease: "easeOut" }}
-          key={route.path}
-        >
-          <motion.div
-           whileHover={{ scale: 1.05, color: "#ff6347" }}
-           whileTap={{ scale: 0.95 }}
-           key={route.path}>
-            <Link
-              href={route.path}
+      initial={{ opacity: 0, x: -100 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8, delay: 0.5, damping: 10, stiffness: 80, type: "spring" }}
+      className="hidden sm:block w-64 h-screen"
+    >
+      <ScrollArea className="h-full py-6 px-3 bg-white rounded-lg shadow-md dark:bg-slate-800">
+        <div className="space-y-4 py-4">
+          {sidebarRoutes.map((route, index) => (
+            <motion.div
               key={route.path}
-              className={`flex items-center gap-4 p-3 rounded-lg 
-          ${
-            pathname.startsWith(route.path) &&
-            "bg-[#003285] text-white hover:bg-[#003285]/80 "
-          }
-          `}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
             >
-              {route.icon} {route.label}
-            </Link>
-          </motion.div>
-        </motion.div>
-      ))}
+              <Button
+                asChild
+                variant={pathname.startsWith(route.path) ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Link href={route.path}>
+                  {route.icon}
+                  {route.label}
+                </Link>
+              </Button>
+            </motion.div>
+          ))}
+        </div>
+      </ScrollArea>
     </motion.div>
   );
 };
