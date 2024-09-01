@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, CheckCircle, Clock } from "lucide-react";
 import { getUserEnrolledCourses } from '@/lib/actions';
 import Link from 'next/link';
-import { TextRevealCard, TextRevealCardTitle, TextRevealCardDescription } from "@/components/ui/text-reveal-card";
+import { TextRevealCard } from "@/components/ui/text-reveal-card";
 import { TextEffect } from '@/components/TextEffect';
 
 // Add this function at the top of the file, outside the component
@@ -78,10 +79,10 @@ export default function UserCourseProgress() {
                 <CardTitle className="text-xl">{course.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <Progress value={course.progress} className="h-2 mb-4" />
+                <AnimatedProgress progress={course.progress} />
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
                   <Badge variant={course.progress === 100 ? "secondary" : "default"} className="text-sm mb-2 sm:mb-0">
-                    {course.progress}% Complete
+                    <AnimatedNumber value={course.progress} />% Complete
                   </Badge>
                   <span className="text-sm text-muted-foreground">
                     {course.completedSections}/{course.totalSections} sections
@@ -119,4 +120,41 @@ export default function UserCourseProgress() {
       
     </div>
   );
+}
+
+interface CustomWidth {
+  asPercent: () => string;
+}
+
+function AnimatedProgress({ progress }: { progress: number }) {
+  const roundedWidth = useCustomWidth(progress);
+
+  return (
+    <Progress value={progress} className="h-2 mb-4">
+      <motion.div
+        className="h-full bg-primary rounded-full"
+        style={{ width: roundedWidth.asPercent() }}
+      />
+    </Progress>
+  );
+}
+
+function AnimatedNumber({ value }: { value: number }) {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, Math.round);
+
+  useEffect(() => {
+    animate(count, value, { duration: 1 });
+  }, [count, value]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
+
+// Add this custom hook
+function useCustomWidth(progress: number): { asPercent: () => string } {
+  const width = useMotionValue(0);
+  useEffect(() => {
+    animate(width, progress);
+  }, [width, progress]);
+  return { asPercent: () => `${width.get()}%` };
 }
