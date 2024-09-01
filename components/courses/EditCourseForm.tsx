@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Course } from "@prisma/client";
+import { format } from 'date-fns';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -106,7 +107,7 @@ const EditCourseForm = ({
     },
     { label: "Weeks", path: `/instructor/courses/${course.id}/sections` },
   ];
-
+ console.log( `Edit Course - Updated At: ${course.updatedAt}`);
   return (
     <>
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-between mb-7">
@@ -336,6 +337,12 @@ const EditCourseForm = ({
               </FormItem>
             )}
           />
+
+          {course.updatedAt && (
+            <p className="text-sm text-gray-500">
+              Last updated: {format(new Date(course.updatedAt), 'PPpp')}
+            </p>
+          )}
 
           <div className="flex gap-5 py-4">
             <Link href="/instructor/courses">

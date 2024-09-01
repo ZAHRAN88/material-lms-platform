@@ -73,7 +73,7 @@ export default function SignUpPage() {
         /> */}
       </div>
       <div className="max-w-md w-full space-y-8 dark:bg-gray-900 bg-white p-10 rounded-xl shadow-2xl">
-        <div>
+        <div className=''>
           <h2 className="mt-6 text-center text-3xl font-extrabold dark:text-white text-black">
             Create your account
           </h2>

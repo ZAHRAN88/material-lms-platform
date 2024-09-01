@@ -43,7 +43,6 @@ const Topbar: React.FC<TopbarProps> = ({ isAdmin }) => {
 
   const topRoutes = [
     { label: "Instructor", path: "/instructor/courses" },
-    { label: "Learning", path: "/learning" },
   ];
 
   const sidebarRoutes = [
@@ -61,11 +60,7 @@ const Topbar: React.FC<TopbarProps> = ({ isAdmin }) => {
       icon: <TimerIcon className="h-4 w-4" />,
       label: "mwaead",
     },
-    {
-      href: "/learning",
-      key: "/learning",
-      label: "My Courses",
-    },
+    
   ];
 
   const [searchInput, setSearchInput] = useState("");
@@ -231,13 +226,7 @@ const Topbar: React.FC<TopbarProps> = ({ isAdmin }) => {
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 )}
-                <Link
-                  href="/learning"
-                  className="text-sm font-medium hover:text-[#003285] flex justify-between items-center"
-                >
-                  My Courses
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
+                
                 <Link
                   href="/mwaead"
                   className="text-sm font-medium hover:text-[#003285] flex justify-between items-center"

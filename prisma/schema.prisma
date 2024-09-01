@@ -43,7 +43,7 @@ model Course {
   User         User?    @relation("InstructorCourses", fields: [instructorId], references: [id])
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt  // Change this line
   @@index([categoryId])
   @@index([subCategoryId])
   @@index([levelId])

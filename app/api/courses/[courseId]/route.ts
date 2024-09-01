@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import Mux from "@mux/mux-node";
 import { getUserFromToken } from "@/app/actions";
 const { video } = new Mux({
@@ -7,35 +7,33 @@ const { video } = new Mux({
   tokenSecret: process.env.MUX_TOKEN_SECRET,
 });
 
-export const PATCH = async (
-  req: NextRequest,
+export async function PATCH(
+  req: Request,
   { params }: { params: { courseId: string } }
-) => {
+) {
   try {
-    const user = await getUserFromToken();
     const { courseId } = params;
     const values = await req.json();
 
-    if (!user) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
     const course = await db.course.update({
-      where: { id: courseId, instructorId: user.id },
-      data: { ...values },
+      where: { id: courseId },
+      data: {
+        ...values,
+        updatedAt: new Date(), // Explicitly set updatedAt
+      },
     });
 
-    return NextResponse.json(course, { status: 200 });
-  } catch (err) {
-    console.error(["courseId_PATCH", err]);
-    return new Response("Internal Server Error", { status: 500 });
+    return NextResponse.json(course);
+  } catch (error) {
+    console.error("[COURSE_ID_PATCH]", error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
 
-export const DELETE = async (
+export async function DELETE(
   req: NextRequest,
   { params }: { params: { courseId: string } }
-) => {
+) {
   try {
     const user = await getUserFromToken();
     const { courseId } = params;
@@ -75,3 +73,27 @@ export const DELETE = async (
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 };
+
+export async function GET(
+  req: Request,
+  { params }: { params: { courseId: string } }
+) {
+  try {
+    const { courseId } = params;
+    const course = await db.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      return new NextResponse("Course not found", { status: 404 });
+    }
+
+    console.log('API - Course ID:', course.id);
+    console.log('API - Updated At:', course.updatedAt);
+
+    return NextResponse.json(course);
+  } catch (error) {
+    console.error("[COURSE_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}

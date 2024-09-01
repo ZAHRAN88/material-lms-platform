@@ -54,7 +54,7 @@ const DaySchedule: React.FC<DayScheduleProps> = ({ days, allTimes, engineers }) 
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          <ScrollArea className="h-[300px] rounded-md border">
+          <ScrollArea className="h-[300px]  rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>

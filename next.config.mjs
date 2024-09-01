@@ -5,7 +5,10 @@ const nextConfig = {
       { hostname: 'utfs.io'},
       { hostname: 'img.clerk.com'}
     ]
-  }
+  },
+  experimental: {
+    serverActions: true,
+  },
 };
 
 export default nextConfig;

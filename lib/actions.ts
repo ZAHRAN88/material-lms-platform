@@ -104,3 +104,58 @@ export const createCourse = async (data: {
     return { success: false, error: error instanceof Error ? error.message : "Unknown error occurred" };
   }
 }
+export const getUserEnrolledCourses = async () => {
+  try {
+    const user = await getUserFromToken();
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    const enrolledCourses = await db.purchase.findMany({
+      where: {
+        customerId: user.id,
+      },
+      include: {
+        course: {
+          include: {
+            category: true,
+            subCategory: true,
+            instructor: true,
+            sections: {
+              include: {
+                progress: {
+                  where: {
+                    studentId: user.id
+                  }
+                }
+              }
+            }
+          },
+        },
+      },
+    });
+
+    return enrolledCourses.map(enrollment => {
+      const course = enrollment.course;
+      const totalSections = course.sections.length;
+      const completedSections = course.sections.filter(section => 
+        section.progress.some(p => p.isCompleted)
+      ).length;
+      const remainingSections = totalSections - completedSections;
+      const progress = totalSections > 0 
+        ? Math.round((completedSections / totalSections) * 100) 
+        : 0;
+
+      return {
+        ...course,
+        totalSections,
+        completedSections,
+        remainingSections,
+        progress
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching user enrolled courses:", error);
+    throw error;
+  }
+};
