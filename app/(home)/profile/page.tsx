@@ -107,7 +107,7 @@ export default function UserCourseProgress() {
           </Link>
         ))}
       </div>
-      <div className="flex justify-center items-center text-center h-64 sm:flex hidden px-3">
+      <div className=" justify-center items-center text-center h-64 sm:flex hidden px-3">
         <TextRevealCard 
           text={`Overall Progress: ${totalProgress}%`}
           revealText="Keep learning!"

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import DaySchedule from './DaySchedule';
 
@@ -37,15 +37,39 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
 
   const allTimes = engineers.flatMap(engineer => engineer.times);
 
+  const buttonVariants = {
+    active: { scale: 1.05, transition: { type: "spring", stiffness: 300, damping: 10 } },
+    inactive: { scale: 1 }
+  };
+
+  const tableRowVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.1, duration: 0.3 }
+    })
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <Button onClick={() => setViewMode('engineer')} variant={viewMode === 'engineer' ? "default" : "outline"}>
-          View by Engineer
-        </Button>
-        <Button onClick={() => setViewMode('day')} variant={viewMode === 'day' ? "default" : "outline"}>
-          View by Day
-        </Button>
+        <motion.div
+          variants={buttonVariants}
+          animate={viewMode === 'engineer' ? 'active' : 'inactive'}
+        >
+          <Button onClick={() => setViewMode('engineer')} variant={viewMode === 'engineer' ? "default" : "outline"}>
+            View by Engineer
+          </Button>
+        </motion.div>
+        <motion.div
+          variants={buttonVariants}
+          animate={viewMode === 'day' ? 'active' : 'inactive'}
+        >
+          <Button onClick={() => setViewMode('day')} variant={viewMode === 'day' ? "default" : "outline"}>
+            View by Day
+          </Button>
+        </motion.div>
       </div>
 
       {viewMode === 'engineer' ? (
@@ -63,35 +87,47 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
             </SelectContent>
           </Select>
 
-          {selectedEngineer && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ScrollArea className="h-[300px] rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Day</TableHead>
-                      <TableHead>Time Slot</TableHead>
-                      <TableHead>Place</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedEngineer.times.map((slot) => (
-                      <TableRow key={slot.id}>
-                        <TableCell>{slot.day}</TableCell>
-                        <TableCell>{slot.time}</TableCell>
-                        <TableCell>{slot.place}</TableCell>
+          <AnimatePresence mode="wait">
+            {selectedEngineer && (
+              <motion.div
+                key={selectedEngineer.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ScrollArea className="h-[300px] rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Day</TableHead>
+                        <TableHead>Time Slot</TableHead>
+                        <TableHead>Place</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </motion.div>
-          )}
+                    </TableHeader>
+                    <TableBody>
+                      <AnimatePresence>
+                        {selectedEngineer.times.map((slot, index) => (
+                          <motion.tr
+                            key={slot.id}
+                            custom={index}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            variants={tableRowVariants}
+                          >
+                            <TableCell>{slot.day}</TableCell>
+                            <TableCell>{slot.time}</TableCell>
+                            <TableCell>{slot.place}</TableCell>
+                          </motion.tr>
+                        ))}
+                      </AnimatePresence>
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {!selectedEngineer && (
             <p className="text-center text-muted-foreground">
