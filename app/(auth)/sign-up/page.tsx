@@ -64,13 +64,13 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="absolute top-0 left-0 w-full h-full -z-10">
-        {/* <Image
+        <Image
           src="/hero-bg.jpg"
           alt="Background Image"
           layout="fill"
           objectFit="cover"
           className="opacity-50"
-        /> */}
+        />
       </div>
       <div className="max-w-md w-full space-y-8 dark:bg-gray-900 bg-white p-10 rounded-xl shadow-2xl">
         <div className=''>

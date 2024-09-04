@@ -74,7 +74,7 @@ const CourseData = async ({ params }: { params: { courseId: string } }) => {
   const isCompleted = missingFieldsCount === 0;
 
   return (
-    <div className="w-full bg-transparent mx-auto rounded-lg">
+    <div className="w-full  mx-auto rounded-lg">
       <div className="mb-8">
         <Link href="/instructor/courses">
           <Button variant="ghost" className="text-sm font-medium">
@@ -84,7 +84,7 @@ const CourseData = async ({ params }: { params: { courseId: string } }) => {
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg ">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Course Basics</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">

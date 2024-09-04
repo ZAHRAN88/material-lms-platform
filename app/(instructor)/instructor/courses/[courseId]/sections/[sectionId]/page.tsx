@@ -50,11 +50,7 @@ const SectionData = async ({
 
   return (
     <>
-      {/* <AlertBanner
-        isCompleted={isCompleted}
-        requiredFieldsCount={requiredFieldsCount}
-        missingFieldsCount={missingFieldsCount}
-      /> */}
+      
       <EditSectionForm
         section={section}
         courseId={params.courseId}
@@ -89,7 +85,7 @@ const SectionDetailsPage = ({
   params: { courseId: string; sectionId: string };
 }) => {
   return (
-    <div className="px-10">
+    <div className="px-10 ">
       <Suspense fallback={<LoadingSkeleton />}>
         <SectionData params={params} />
       </Suspense>

@@ -92,6 +92,8 @@ model Section {
 
   progress Progress[]
 
+  question Question?  // Add this line
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
@@ -254,5 +256,15 @@ enum Role {
   INSTRUCTOR
   ADMIN
   MASTER
+}
+
+// Add this new model
+model Question {
+  id                String   @id @default(uuid()) @map("_id")
+  text              String
+  answer            String
+  incorrectAnswers  String[]
+  section           Section  @relation(fields: [sectionId], references: [id])
+  sectionId         String   @unique
 }
 

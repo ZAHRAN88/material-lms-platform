@@ -22,7 +22,7 @@ const CourseList = async () => {
   }
 
   return (
-    <div className="flex flex-wrap gap-7 items-center m-auto justify-center">
+    <div className="flex flex-wrap gap-7 items-center px-10 m-auto justify-center">
       {courses.map((course) => (
         <MotionDiv
           key={course.id}

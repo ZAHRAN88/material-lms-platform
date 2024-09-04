@@ -39,6 +39,7 @@ export const POST = async (
         courseId,
       },
       data: {
+        // Remove or rename 'questionText' if it's not in your schema
         ...values,
       },
     });
@@ -76,8 +77,12 @@ export const POST = async (
 
     return NextResponse.json(section, { status: 200 });
   } catch (err) {
-    console.log("[sectionId_POST]", err);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("[sectionId_POST]", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+    return new NextResponse(JSON.stringify({ error: errorMessage }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 };
 

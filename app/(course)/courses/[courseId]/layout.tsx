@@ -22,7 +22,8 @@ const CourseDetailsLayout = async ({
   }
 
   const admins = await Admins();
-  const isAdmin = admins.some((admin: any) => admin.id === user.id);
+  const isAdmin = user?.role === "ADMIN";
+
 
   const course = await db.course.findUnique({
     where: {
