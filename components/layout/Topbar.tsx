@@ -66,6 +66,13 @@ const Topbar: React.FC<TopbarProps> = ({ isAdmin }) => {
   const [searchInput, setSearchInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 15) {
+      setSearchInput(value);
+    }
+  };
+
   const handleSearch = async () => {
     if (searchInput.trim() !== "") {
       setIsLoading(true);
@@ -124,12 +131,13 @@ const Topbar: React.FC<TopbarProps> = ({ isAdmin }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="flex-grow bg-transparent border-none outline-none text-sm"
-                placeholder="Search for courses"
+                placeholder="Search (max 15 chars)"
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={handleSearchInputChange}
                 onKeyDown={handleKeyDown}
                 style={{ padding }}
                 disabled={isLoading}
+                maxLength={15}
               />
             )}
           </AnimatePresence>
