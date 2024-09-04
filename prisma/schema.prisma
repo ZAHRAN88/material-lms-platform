@@ -9,10 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider     = "mongodb"
-  url          = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL")
-  relationMode = "prisma"
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model Course {
@@ -40,7 +39,7 @@ model Course {
   purchases Purchase[]
 
   instructor   User     @relation(fields: [instructorId], references: [id])
-  User         User?    @relation("InstructorCourses", fields: [instructorId], references: [id])
+  User         User?    @relation("InstructorCourses", fields: [instructorId], references: [id], map: "Course_instructor_fkey")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt  // Change this line
@@ -173,18 +172,18 @@ model Admins {
  
 }
 model Engineer {
-  id     String    @id @default(auto()) @map("_id") @db.ObjectId
+  id     String    @id @default(uuid()) @map("_id")
   name   String
   times  TimeSlot[]
 }
 
 model TimeSlot {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  id         String    @id @default(uuid()) @map("_id")
   day        String
   time       String
   place      String
   engineer   Engineer  @relation(fields: [engineerId], references: [id])
-  engineerId String    @db.ObjectId
+  engineerId String
 }
 
 model User {
