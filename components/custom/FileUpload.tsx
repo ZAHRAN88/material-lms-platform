@@ -50,8 +50,9 @@ const FileUpload = ({ value, onChange, endpoint, page }: FileUploadProps) => {
             onChange(res?.[0].url);
             toast.success("File uploaded successfully");
           }}
-          onUploadError={(error: Error) => {
-            toast.error(error.message);
+          onUploadError={(error: unknown) => { // Change type to unknown
+            const errorMessage = (error instanceof Error) ? error.message : "Upload error"; // Check type
+            toast.error(errorMessage);
           }}
           className="ut-button:bg-primary ut-button:hover:bg-primary/90 ut-button:ut-readying:bg-primary/80 ut-button:ut-uploading:bg-primary/80"
         />

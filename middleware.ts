@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { localePrefix, locales } from './navigation';
 
-export function middleware(request: NextRequest) {
-  // Your middleware logic goes here
-  return NextResponse.next();
-}
+export default createMiddleware({
+  locales,
+  localePrefix,
+  defaultLocale: 'en'
+});
 
-// Optional: Configure paths for the middleware to run on
-// export const config = {
-//   matcher: ['/api/:path*', '/dashboard/:path*'],
-// };
+// only applies this middleware to files in the app directory
+export const config = {
+  matcher: ['/((?!api|_next|.*\\..*).*)']
+};

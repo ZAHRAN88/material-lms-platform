@@ -90,13 +90,21 @@ const EditCourseForm = ({
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Check if levelId exists in the levels array
+    const validLevel = levels.some(level => level.value === values.levelId);
+    
+    if (!validLevel) {
+      toast.error("Invalid level selected. Please choose a valid level.");
+      return;
+    }
+
     try {
       await axios.patch(`/api/courses/${course.id}`, values);
       toast.success("Course Updated");
       router.refresh();
     } catch (err) {
       console.log("Failed to update the course", err);
-      toast.error("Something went wrong!");
+      toast.error("Failed to update the course. Please try again.");
     }
   };
 

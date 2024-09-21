@@ -9,6 +9,10 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
+  i18n: {
+    locales: ['en', 'fr'], // Add your supported locales here
+    defaultLocale: 'en',   // Set the default locale
+  },
 };
 
 export default nextConfig;

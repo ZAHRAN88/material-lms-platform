@@ -51,15 +51,15 @@ const CourseCard = async ({ course }: { course: Course }) => {
   return (
     <Link href={`/courses/${course.id}/overview`}>
       <MotionDiv>
-        <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 w-96 h-96"> {/* Set a fixed width */}
           <CardHeader className="p-0">
             <div className="relative">
               <Image
                 src={course.imageUrl || "/image_placeholder.webp"}
                 alt={course.title}
-                width={500}
+                width={600}
                 height={300}
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover" // Ensure the image covers the area
               />
               <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
                 {course.subCategoryId === "0fd2caa0-ccf4-4aa3-8f80-62f927e176c4" ? "Basmaga" : "Programming"}

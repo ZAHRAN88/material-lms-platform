@@ -19,13 +19,13 @@ export async function PATCH(
       where: { id: courseId },
       data: {
         ...values,
-        updatedAt: new Date(), // Explicitly set updatedAt
+        updatedAt: new Date(), 
       },
     });
 
     return NextResponse.json(course);
-  } catch (error) {
-    console.error("[COURSE_ID_PATCH]", error);
+  } catch (error: unknown) { // Specify the type of error
+    console.error("[COURSE_ID_PATCH]", (error as Error).message); // Cast to Error
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -68,8 +68,8 @@ export async function DELETE(
     });
 
     return new NextResponse("Course Deleted", { status: 200 });
-  } catch (err) {
-    console.error(["courseId_DELETE", err]);
+  } catch (err: unknown) { // Specify the type of error
+    console.error("[courseId_DELETE]", (err as Error).message); // Cast to Error
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 };
@@ -92,8 +92,8 @@ export async function GET(
     console.log('API - Updated At:', course.updatedAt);
 
     return NextResponse.json(course);
-  } catch (error) {
-    console.error("[COURSE_GET]", error);
+  } catch (error: unknown) { // Specify the type of error
+    console.error("[COURSE_GET]", (error as Error).message); // Cast to Error
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
