@@ -6,6 +6,7 @@ import CourseSkeleton from "@/components/courses/CourseSkeleton";
 import { MotionDiv } from "@/components/MotionDiv";
 import { Suspense } from "react";
 import Link from "next/link";
+import HeroSection from "@/components/home";
 
 const CourseList = async () => {
   const courses = await getCoursesByCategory(null);
@@ -60,11 +61,17 @@ export default async function Home() {
   });
 
   return (
+    <div>
+   
+      <HeroSection/>
     <div className="md:mt-5 md:px-10 xl:px-16 pb-16">
+
       <Categories categories={categories} selectedCategory={null} />
       <Suspense fallback={<LoadingSkeleton />}>
         <CourseList />
       </Suspense>
+      </div>
+
     </div>
   );
 }
