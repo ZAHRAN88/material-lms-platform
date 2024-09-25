@@ -5,12 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { format } from 'date-fns'; // Import format from date-fns
+import { format } from 'date-fns'; 
 
 interface TimeSlot {
   id: string;
   day: string;
-  time: string; // Assuming this is a string representation of a time
+  time: string; 
   place: string;
   engineerId: string;
 }
@@ -30,7 +30,9 @@ const DaySchedule: React.FC<DayScheduleProps> = ({ days, allTimes, engineers }) 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   const timesForSelectedDay = selectedDay
-    ? allTimes.filter(slot => slot.day === selectedDay)
+    ? allTimes
+        .filter(slot => slot.day === selectedDay)
+        .sort((a, b) => new Date(`1970-01-01T${a.time}`) > new Date(`1970-01-01T${b.time}`) ? 1 : -1) 
     : [];
 
   return (

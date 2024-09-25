@@ -34,7 +34,7 @@ const addEngineer = async (formData: FormData): Promise<Engineer> => {
                 }
             }
         },
-        include: { times: true } // Include the related times
+        include: { times: true } 
     });
 
     return {
@@ -75,7 +75,7 @@ const signUp = async (name: string, email: string, password: string) => {
 				name,
 				email,
 				password: hashedPassword,
-				role: 'USER'  // Set the default role to 'USER'
+				role: 'USER'  
 			}
 		});
 
@@ -105,18 +105,18 @@ export async function signIn(email: string, password: string) {
 			return { success: false, error: 'Invalid email or password' };
 		}
 
-		// Create a JWT token
+		
 		const token = await new SignJWT({ userId: user.id })
 			.setProtectedHeader({ alg: 'HS256' })
 			.setExpirationTime('1d')
 			.sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
-		// Set the token in a cookie
+		
 		cookies().set('token', token, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			sameSite: 'strict',
-			maxAge: 86400, // 1 day
+			maxAge: 86400, 
 			path: '/',
 		});
 

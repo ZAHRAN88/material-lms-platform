@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'react-hot-toast'; // Assuming you're using react-hot-toast
+import { toast } from 'react-hot-toast'; 
 import { useRouter } from 'next/navigation';
 
 interface Time {
@@ -17,8 +17,8 @@ interface Time {
 interface AddTimesFormProps {
   engineerId: string;
   engineerName: string;
-  onClose: () => void; // Add this line
-  onAddTimes: (newTimes: Time[]) => void; // Updated prop type
+  onClose: () => void; 
+  onAddTimes: (newTimes: Time[]) => void; 
 }
 
 const AddTimesForm: React.FC<AddTimesFormProps> = ({ engineerId, engineerName, onClose, onAddTimes }) => {

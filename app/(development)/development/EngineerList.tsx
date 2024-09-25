@@ -3,17 +3,17 @@ import React, { useState } from 'react';
 import { PlusCircle, Clock, Edit } from 'lucide-react';
 import AddTimesForm from './AddTimesForm';
 import EngineerForm from './EngineerForm';
-import EditEngineerForm from './EditEngineerForm'; // Import the new EditEngineerForm
+import EditEngineerForm from './EditEngineerForm'; 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { addTimesToEngineer } from '@/app/actions';
 import EditTimeSlotForm from './EditTimeSlotsForm';
-import { updateEngineer, updateTimeSlot } from '@/app/actions'; // Import the new actions
+import { updateEngineer, updateTimeSlot } from '@/app/actions'; 
 
 interface Time {
-  id: string; // Add this line
+  id: string; 
   day: string;
   time: string;
   place: string;
@@ -29,14 +29,14 @@ interface EngineerListProps {
   engineers: Engineer[];
 }
 
-const defaultValue: Engineer[] = []; // Explicitly define the type of defaultValue
+const defaultValue: Engineer[] = []; 
 
 const EngineerList: React.FC<EngineerListProps> = ({ engineers: initialEngineers }) => {
   const [engineers, setEngineers] = useState<Engineer[]>(initialEngineers);
   const [isAddEngineerOpen, setIsAddEngineerOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<Engineer | null>(null);
   const [isViewTimesOpen, setIsViewTimesOpen] = useState(false);
-  const [isEditEngineerOpen, setIsEditEngineerOpen] = useState(false); // State for edit dialog
+  const [isEditEngineerOpen, setIsEditEngineerOpen] = useState(false); 
   const [isEditTimeSlotOpen, setIsEditTimeSlotOpen] = useState(false);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<Time | null>(null);
 
@@ -47,7 +47,7 @@ const EngineerList: React.FC<EngineerListProps> = ({ engineers: initialEngineers
   const handleAddTimes = async (newTimes: Time[]): Promise<void> => {
     if (selectedEngineer) {
       try {
-        // Handle adding times
+        
         handleCloseDialogs();
       } catch (error) {
         console.error('Error adding times:', error);
@@ -68,9 +68,9 @@ const EngineerList: React.FC<EngineerListProps> = ({ engineers: initialEngineers
   const handleUpdateEngineer = async (id: string, name: string) => {
     try {
       const updatedEngineer = await updateEngineer(id, name);
-      // Ensure updatedEngineer has all properties of Engineer
-      const completeEngineer: Engineer = { ...updatedEngineer, times: [{ id: '', day: '', time: '', place: '' }] }; // Wrap defaultValue in an array of Time objects
-      setEngineers((prev: Engineer[]) => // Change type of prev to Engineer[]
+      
+      const completeEngineer: Engineer = { ...updatedEngineer, times: [{ id: '', day: '', time: '', place: '' }] }; 
+      setEngineers((prev: Engineer[]) => 
         prev.map((engineer) => (engineer.id === completeEngineer.id ? { ...engineer, times: completeEngineer.times } : engineer))
       );
     } catch (error) {
@@ -81,7 +81,7 @@ const EngineerList: React.FC<EngineerListProps> = ({ engineers: initialEngineers
   const handleCloseDialogs = () => {
     setIsAddEngineerOpen(false);
     setIsViewTimesOpen(false);
-    setIsEditEngineerOpen(false); // Close edit dialog
+    setIsEditEngineerOpen(false); 
     setSelectedEngineer(null);
   };
 
@@ -196,7 +196,7 @@ const EngineerList: React.FC<EngineerListProps> = ({ engineers: initialEngineers
                       </Table>
                       <AddTimesForm 
                         engineerId={engineer.id} 
-                        onAddTimes={handleAddTimes as (newTimes: any) => void} // Use 'any' as a temporary fix
+                        onAddTimes={handleAddTimes as (newTimes: any) => void} 
                         engineerName={engineer.name} 
                         onClose={handleCloseDialogs} 
                       />

@@ -7,7 +7,7 @@ import ReadText from "@/components/custom/ReadText";
 import SectionMenu from "@/components/layout/SectionMenu";
 import { MotionDiv, MotionP } from "@/components/MotionDiv";
 import { getUserFromToken } from "@/app/actions";
-import { Clock, Book, User } from "lucide-react"; // Import icons
+import { Clock, Book, User } from "lucide-react"; 
 
 const LoadingSkeleton = () => (
   <div className="px-6 py-4 flex flex-col gap-5 animate-pulse">

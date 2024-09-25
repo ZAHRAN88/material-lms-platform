@@ -26,7 +26,7 @@ const getCachedPurchasedCourses = unstable_cache(
 		},
 	}),
 	['purchased-courses'],
-	{ revalidate: 3600 } // Cache for 1 hour
+	{ revalidate: 3600 } 
 );
 
 const PurchasedCourses = async () => {

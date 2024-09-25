@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getUserFromToken } from '../actions';
-import { Role } from '@prisma/client'; // Assuming Role is from Prisma
+import { Role } from '@prisma/client'; 
 
 interface User {
     id: string;
@@ -17,7 +17,6 @@ export default function UserInfo() {
     useEffect(() => {
         async function fetchUser() {
             const userData = await getUserFromToken();
-            console.log('User data in component:', userData);
             setUser(userData);
         }
         fetchUser();

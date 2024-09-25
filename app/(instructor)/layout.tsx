@@ -7,7 +7,6 @@ import { getUserFromToken } from "../actions";
 
 const InstructorLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = await getUserFromToken();
-  console.log(user);
 const isAdmin = user?.role === "ADMIN";
   
   if (!user) {

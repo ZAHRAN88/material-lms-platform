@@ -45,7 +45,6 @@ export const getPerformance = async (userId: string) => {
       totalSales,
     };
   } catch (err) {
-    console.log("[getPerformance]", err);
     return {
       data: [],
       totalRevenue: 0,

@@ -52,8 +52,8 @@ const formSchema = z.object({
 interface EditCourseFormProps {
   course: Course;
   categories: {
-    label: string; // name of category
-    value: string; // categoryId
+    label: string; 
+    value: string; 
     subCategories: { label: string; value: string }[];
   }[];
   levels: { label: string; value: string }[];
@@ -69,7 +69,7 @@ const EditCourseForm = ({
   const router = useRouter();
   const pathname = usePathname();
 
-  // 1. Define your form.
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -88,9 +88,9 @@ const EditCourseForm = ({
 
   const { isValid, isSubmitting } = form.formState;
 
-  // 2. Define a submit handler.
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // Check if levelId exists in the levels array
+    
     const validLevel = levels.some(level => level.value === values.levelId);
     
     if (!validLevel) {
@@ -103,7 +103,6 @@ const EditCourseForm = ({
       toast.success("Course Updated");
       router.refresh();
     } catch (err) {
-      console.log("Failed to update the course", err);
       toast.error("Failed to update the course. Please try again.");
     }
   };
@@ -115,7 +114,6 @@ const EditCourseForm = ({
     },
     { label: "Weeks", path: `/instructor/courses/${course.id}/sections` },
   ];
- console.log( `Edit Course - Updated At: ${course.updatedAt}`);
   return (
     <>
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-between mb-7">

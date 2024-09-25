@@ -8,7 +8,7 @@ async function getUserRole(userId: string) {
     where: { id: userId },
     select: { role: true },
   });
-  return userRole?.role || 'USER';  // Default to USER if no role is set
+  return userRole?.role || 'USER';  
 }
 
 export async function GET(req: NextRequest) {

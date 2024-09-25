@@ -12,7 +12,7 @@ import { TextRevealCard } from "@/components/ui/text-reveal-card";
 import { TextEffect } from "@/components/TextEffect";
 import { Button } from "@/components/ui/button";
 
-// Add this function at the top of the file, outside the component
+
 function calculateTotalProgress(courses: Course[]): number {
   if (courses.length === 0) return 0;
   const totalProgress = courses.reduce(
@@ -33,7 +33,7 @@ interface Course {
   subCategory: { id: string; name: string; categoryId: string };
   totalLessons: number;
   completedLessons: number;
-  // Add other properties as needed
+  
 }
 
 export default function UserCourseProgress() {
@@ -193,7 +193,7 @@ function AnimatedNumber({ value }: { value: number }) {
   return <motion.span>{rounded}</motion.span>;
 }
 
-// Add this custom hook
+
 function useCustomWidth(progress: number): { asPercent: () => string } {
   const width = useMotionValue(0);
   useEffect(() => {

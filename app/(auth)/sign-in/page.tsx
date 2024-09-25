@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 
-// Define the schema for form validation
+
 const signInSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
@@ -44,7 +44,7 @@ export default function SignInPage() {
           name: result.user.name || '',
           email: result.user.email
         });
-        router.push('/'); // Redirect to dashboard on successful sign-in
+        router.push('/'); 
       } else {
         setError(result.error || 'Invalid email or password');
       }

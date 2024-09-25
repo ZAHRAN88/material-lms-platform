@@ -1,4 +1,4 @@
-// components/EngineerTimesServer.tsx
+
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { db } from "@/lib/db";
@@ -56,13 +56,11 @@ const EngineerTimesServer = async () => {
           day: true,
           time: true,
           place: true,
-          engineerId: true, // Add this line
+          engineerId: true, 
         },
       },
     },
-  });
-
-  console.log(engineers[0]?.times); // For debugging
+  }); 
 
   return (
     <div className="flex flex-col gap-3 items-center justify-center">

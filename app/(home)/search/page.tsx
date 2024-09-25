@@ -8,9 +8,9 @@ const SearchResults = async ({ queryText }: { queryText: string }) => {
     where: {
       isPublished: true,
       OR: [
-        { title: { contains: queryText, mode: 'insensitive' } }, // Searching by title
-        { category: { name: { contains: queryText, mode: 'insensitive' } }}, // Searching by category name
-        { subCategory: { name: { contains: queryText, mode: 'insensitive' } }} // Searching by subCategory name
+        { title: { contains: queryText, mode: 'insensitive' } }, 
+        { category: { name: { contains: queryText, mode: 'insensitive' } }}, 
+        { subCategory: { name: { contains: queryText, mode: 'insensitive' } }} 
       ]
     },
     include: {

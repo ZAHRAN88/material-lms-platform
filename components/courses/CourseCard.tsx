@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from 'date-fns';
 
-// Add this helper function at the top of the file
+
 function getTimeAgo(date: Date): string {
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - date.getTime());
@@ -30,15 +30,8 @@ const CourseCard = async ({ course }: { course: Course }) => {
   const sectionsCount = await db.section.count({ where: { courseId: course.id } });
   const level = course.levelId ? await db.level.findUnique({ where: { id: course.levelId } }) : null;
   const category = course.categoryId ? await db.category.findUnique({ where: { id: course.categoryId } }) : null;
-  console.log('====================================');
-  console.log(course.updatedAt);
-  console.log('====================================');
 
-  console.log('Course ID:', course.id);
-  console.log('Updated At:', course.updatedAt);
-  console.log('Updated At Type:', typeof course.updatedAt);
-
-  // Helper function to safely format the date
+  
   const formatDate = (date: Date) => {
     try {
       return format(date, 'PPpp');
@@ -59,7 +52,7 @@ const CourseCard = async ({ course }: { course: Course }) => {
                 alt={course.title}
                 width={600}
                 height={300}
-                className="w-full h-48 object-cover" // Ensure the image covers the area
+                className="w-full h-48 object-cover" 
               />
               <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
                 {course.subCategoryId === "0fd2caa0-ccf4-4aa3-8f80-62f927e176c4" ? "Basmaga" : "Programming"}

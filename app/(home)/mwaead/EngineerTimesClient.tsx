@@ -20,7 +20,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import DaySchedule from "./DaySchedule";
-import { format } from "date-fns"; // Import format from date-fns
+import { format } from "date-fns"; 
 
 interface Engineer {
   id: string;
@@ -33,7 +33,7 @@ interface TimeSlot {
   day: string;
   time: string;
   place: string;
-  engineerId: string; // Add this line
+  engineerId: string; 
 }
 
 interface EngineerTimesClientProps {
@@ -53,13 +53,13 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({
     engineers.find((e) => e.id === selectedEngineerId) || null;
 
   const days = [
-    "Sunday" || "sunday",
-    "Monday" || "monday",
-    "Tuesday" || "tuesday",
-    "Wednesday" || "wednesday",
-    "Thursday" || "thursday",
-    "Friday" || "friday",
-    "Saturday" || "saturday",
+    "Sunday"||"Sunday",
+    "Monday"||"monday",
+    "Tuesday"||"tuesday",
+    "Wednesday"||"wednesday",
+    "Thursday"||"thursday",
+    "Friday"||"friday",
+    "Saturday"||"saturday",
   ];
 
   const allTimes = engineers.flatMap((engineer) => engineer.times);
@@ -80,6 +80,17 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({
       transition: { delay: i * 0.1, duration: 0.3 },
     }),
   };
+
+  
+  const sortedTimes = selectedEngineer
+    ? selectedEngineer.times.sort((a, b) => {
+        const dayOrder = days.indexOf(a.day) - days.indexOf(b.day);
+        if (dayOrder !== 0) return dayOrder; 
+        return new Date(`1970-01-01T${a.time}`) > new Date(`1970-01-01T${b.time}`)
+          ? 1
+          : -1; 
+      })
+    : [];
 
   return (
     <div className="space-y-6">
@@ -143,7 +154,7 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({
                     </TableHeader>
                     <TableBody>
                       <AnimatePresence>
-                        {selectedEngineer.times.map((slot, index) => (
+                        {sortedTimes.map((slot, index) => (
                           <motion.tr
                             key={slot.id}
                             custom={index}
@@ -158,8 +169,7 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({
                                 new Date(`1970-01-01T${slot.time}`),
                                 "h:mm a"
                               )}
-                            </TableCell>{" "}
-                            {/* Updated time format */}
+                            </TableCell>
                             <TableCell>{slot.place}</TableCell>
                           </motion.tr>
                         ))}
