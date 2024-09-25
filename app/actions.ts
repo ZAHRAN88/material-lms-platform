@@ -199,3 +199,19 @@ export async function getRecentDiscussions() {
 		}
 	});
 }
+
+export const updateEngineer = async (id: string, name: string) => {
+    const updatedEngineer = await db.engineer.update({
+        where: { id },
+        data: { name },
+    });
+    return updatedEngineer;
+};
+
+export const updateTimeSlot = async (id: string, day: string, time: string, place: string) => {
+    const updatedTimeSlot = await db.timeSlot.update({
+        where: { id },
+        data: { day, time, place },
+    });
+    return updatedTimeSlot;
+};

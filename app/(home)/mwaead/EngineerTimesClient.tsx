@@ -1,12 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import DaySchedule from './DaySchedule';
+import DaySchedule from "./DaySchedule";
+import { format } from "date-fns"; // Import format from date-fns
 
 interface Engineer {
   id: string;
@@ -26,20 +40,36 @@ interface EngineerTimesClientProps {
   engineers: Engineer[];
 }
 
-const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) => {
-  const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'engineer' | 'day'>('engineer');
+const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({
+  engineers,
+}) => {
+  const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(
+    null
+  );
+  const [viewMode, setViewMode] = useState<"engineer" | "day">("engineer");
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
-  const selectedEngineer = engineers.find(e => e.id === selectedEngineerId) || null;
+  const selectedEngineer =
+    engineers.find((e) => e.id === selectedEngineerId) || null;
 
-  const days = ['Sunday'||'sunday', 'Monday'||'monday', 'Tuesday'||'tuesday', 'Wednesday'||'wednesday', 'Thursday'||'thursday', 'Friday'||'friday', 'Saturday'||'saturday'];
+  const days = [
+    "Sunday" || "sunday",
+    "Monday" || "monday",
+    "Tuesday" || "tuesday",
+    "Wednesday" || "wednesday",
+    "Thursday" || "thursday",
+    "Friday" || "friday",
+    "Saturday" || "saturday",
+  ];
 
-  const allTimes = engineers.flatMap(engineer => engineer.times);
+  const allTimes = engineers.flatMap((engineer) => engineer.times);
 
   const buttonVariants = {
-    active: { scale: 1.05, transition: { type: "spring", stiffness: 300, damping: 10 } },
-    inactive: { scale: 1 }
+    active: {
+      scale: 1.05,
+      transition: { type: "spring", stiffness: 300, damping: 10 },
+    },
+    inactive: { scale: 1 },
   };
 
   const tableRowVariants = {
@@ -47,8 +77,8 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { delay: i * 0.1, duration: 0.3 }
-    })
+      transition: { delay: i * 0.1, duration: 0.3 },
+    }),
   };
 
   return (
@@ -56,23 +86,29 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
       <div className="flex justify-between items-center">
         <motion.div
           variants={buttonVariants}
-          animate={viewMode === 'engineer' ? 'active' : 'inactive'}
+          animate={viewMode === "engineer" ? "active" : "inactive"}
         >
-          <Button onClick={() => setViewMode('engineer')} variant={viewMode === 'engineer' ? "default" : "outline"}>
+          <Button
+            onClick={() => setViewMode("engineer")}
+            variant={viewMode === "engineer" ? "default" : "outline"}
+          >
             View by Engineer
           </Button>
         </motion.div>
         <motion.div
           variants={buttonVariants}
-          animate={viewMode === 'day' ? 'active' : 'inactive'}
+          animate={viewMode === "day" ? "active" : "inactive"}
         >
-          <Button onClick={() => setViewMode('day')} variant={viewMode === 'day' ? "default" : "outline"}>
+          <Button
+            onClick={() => setViewMode("day")}
+            variant={viewMode === "day" ? "default" : "outline"}
+          >
             View by Day
           </Button>
         </motion.div>
       </div>
 
-      {viewMode === 'engineer' ? (
+      {viewMode === "engineer" ? (
         <>
           <Select onValueChange={(value) => setSelectedEngineerId(value)}>
             <SelectTrigger className="w-full">
@@ -117,7 +153,13 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
                             variants={tableRowVariants}
                           >
                             <TableCell>{slot.day}</TableCell>
-                            <TableCell>{slot.time}</TableCell>
+                            <TableCell>
+                              {format(
+                                new Date(`1970-01-01T${slot.time}`),
+                                "h:mm a"
+                              )}
+                            </TableCell>{" "}
+                            {/* Updated time format */}
                             <TableCell>{slot.place}</TableCell>
                           </motion.tr>
                         ))}

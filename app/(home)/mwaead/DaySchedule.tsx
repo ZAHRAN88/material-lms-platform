@@ -5,11 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
+import { format } from 'date-fns'; // Import format from date-fns
 
 interface TimeSlot {
   id: string;
   day: string;
-  time: string;
+  time: string; // Assuming this is a string representation of a time
   place: string;
   engineerId: string;
 }
@@ -54,7 +55,7 @@ const DaySchedule: React.FC<DayScheduleProps> = ({ days, allTimes, engineers }) 
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          <ScrollArea className="h-[300px]  rounded-md border">
+          <ScrollArea className="h-[300px] rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -67,7 +68,7 @@ const DaySchedule: React.FC<DayScheduleProps> = ({ days, allTimes, engineers }) 
                 {timesForSelectedDay.map((slot) => (
                   <TableRow key={slot.id}>
                     <TableCell>{engineers.find(e => e.id === slot.engineerId)?.name}</TableCell>
-                    <TableCell>{slot.time}</TableCell>
+                    <TableCell>{format(new Date(`1970-01-01T${slot.time}`), 'h:mm a')}</TableCell> {/* Updated time format */}
                     <TableCell>{slot.place}</TableCell>
                   </TableRow>
                 ))}
