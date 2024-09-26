@@ -7,6 +7,7 @@ import { MotionDiv } from "@/components/MotionDiv";
 import { Suspense } from "react";
 import Link from "next/link";
 import HeroSection from "@/components/home";
+import { Button } from "@mui/material";
 
 const CourseList = async () => {
   const courses = await getCoursesByCategory(null);
@@ -62,7 +63,11 @@ export default async function Home() {
 
   return (
     <div>
-   
+ {/*   <Button onClick={()=>{
+  throw Error
+}}>
+  Error
+</Button> */}
       <HeroSection/>
     <div className="md:mt-5 md:px-10 xl:px-16 pb-16">
 
