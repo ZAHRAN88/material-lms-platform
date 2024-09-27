@@ -328,11 +328,11 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
                 </li>
               ))}
             </ul>
-            <div className="flex space-x-4 mt-6">
-              <Button onClick={saveCustomSchedule} className="flex-1">
+            <div className="flex flex-col sm:flex-row gap-4 mt-6">
+              <Button onClick={saveCustomSchedule} className="w-full sm:w-auto">
                 Save Custom Schedule as PDF
               </Button>
-              <Button onClick={clearCustomSchedule} variant="destructive" className="flex-1">
+              <Button onClick={clearCustomSchedule} variant="destructive" className="w-full sm:w-auto">
                 Clear Schedule
               </Button>
             </div>

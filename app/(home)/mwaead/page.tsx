@@ -79,7 +79,7 @@ const EngineerTimesServer = async () => {
 
       </div>
 
-      <Card className="w-full max-w-2xl mx-auto mt-10 ">
+      <Card className="w-full  max-w-2xl mx-auto mt-10 ">
         <CardContent className="p-6">
           <EngineerTimesClient engineers={engineers}  />
         </CardContent>
