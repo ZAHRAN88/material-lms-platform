@@ -3,6 +3,35 @@ import SectionsDetails from "@/components/sections/SectionsDetails";
 import { db } from "@/lib/db";
 import { Resource } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { cache } from 'react'
+
+export const revalidate = 3600; // Revalidate every hour
+
+const getCachedCourse = cache(async (courseId: string) => {
+  return await db.course.findUnique({
+    where: {
+      id: courseId,
+      isPublished: true,
+    },
+    include: {
+      sections: {
+        where: {
+          isPublished: true,
+        },
+      },
+    },
+  });
+});
+
+const getCachedSection = cache(async (sectionId: string, courseId: string) => {
+  return await db.section.findUnique({
+    where: {
+      id: sectionId,
+      courseId,
+      isPublished: true,
+    },
+  });
+});
 
 const SectionDetailsPage = async ({
   params,
@@ -16,37 +45,20 @@ const SectionDetailsPage = async ({
     return redirect("/sign-in");
   }
 
-  const course = await db.course.findUnique({
-    where: {
-      id: courseId,
-      isPublished: true,
-    },
-    include: {
-      sections: {
-        where: {
-          isPublished: true,
-        },
-      },
-    },
-  });
+  const coursePromise = getCachedCourse(courseId);
+  const sectionPromise = getCachedSection(sectionId, courseId);
+
+  const [course, section] = await Promise.all([coursePromise, sectionPromise]);
 
   if (!course) {
     return redirect("/");
   }
 
-  const section = await db.section.findUnique({
-    where: {
-      id: sectionId,
-      courseId,
-      isPublished: true,
-    },
-  });
-
   if (!section) {
     return redirect(`/courses/${courseId}/overview`);
   }
 
-  const purchase = await db.purchase.findUnique({
+  const purchasePromise = db.purchase.findUnique({
     where: {
       customerId_courseId: {
         customerId: user.id,
@@ -54,6 +66,17 @@ const SectionDetailsPage = async ({
       },
     },
   });
+
+  const progressPromise = db.progress.findUnique({
+    where: {
+      studentId_sectionId: {
+        studentId: user.id,
+        sectionId,
+      },
+    },
+  });
+
+  const [purchase, progress] = await Promise.all([purchasePromise, progressPromise]);
 
   let muxData = null;
   let resources: Resource[] = [];
@@ -73,15 +96,6 @@ const SectionDetailsPage = async ({
       },
     });
   }
-
-  const progress = await db.progress.findUnique({
-    where: {
-      studentId_sectionId: {
-        studentId: user.id,
-        sectionId,
-      },
-    },
-  });
 
   return (
     <SectionsDetails
