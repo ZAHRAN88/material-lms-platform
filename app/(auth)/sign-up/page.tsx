@@ -70,6 +70,10 @@ export default function SignUpPage() {
           layout="fill"
           objectFit="cover"
           className="opacity-50"
+          loading="lazy"
+          placeholder="blur"
+blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
+       
         />
       </div>
       <div className="max-w-md w-full space-y-8 dark:bg-gray-900 bg-white p-10 rounded-xl shadow-2xl">

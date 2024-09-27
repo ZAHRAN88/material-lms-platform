@@ -28,6 +28,10 @@ const FileUpload = ({ value, onChange, endpoint, page }: FileUploadProps) => {
                   alt="Uploaded image"
                   fill
                   className="object-cover rounded-md"
+                  loading="lazy"
+                  placeholder="blur"
+      blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
+               
                 />
               </div>
             )}

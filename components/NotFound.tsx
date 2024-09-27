@@ -24,6 +24,10 @@ const NotFoundClient = () => {
             width={400}
             height={300}
             className="mb-8 mx-auto"
+            loading="lazy"
+            placeholder="blur"
+blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
+         
           />
         </motion.div>
         <motion.h1 

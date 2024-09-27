@@ -30,7 +30,9 @@ const CourseCard = async ({ course }: { course: Course }) => {
                 width={600}
                 height={300}
                 className="w-full h-48 object-cover"
-                priority={true}
+                loading="lazy"
+                placeholder="blur"
+    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
               />
               <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
                 {course.subCategoryId === "0fd2caa0-ccf4-4aa3-8f80-62f927e176c4" ? "Basmaga" : "Programming"}

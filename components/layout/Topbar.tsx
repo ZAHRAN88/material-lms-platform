@@ -117,6 +117,10 @@ const Topbar: React.FC<TopbarProps> = ({ isAdmin }) => {
             height={32}
             width={80}
             alt="logo"
+            loading="lazy"
+            placeholder="blur"
+blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
+         
           />
         </Link>
 
