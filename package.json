@@ -50,6 +50,7 @@
     "@tanstack/react-table": "^8.17.3",
     "@types/jspdf": "^2.0.0",
     "@uploadthing/react": "^6.6.0",
+    "@vercel/speed-insights": "^1.0.12",
     "ai": "^3.3.4",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",

@@ -10,6 +10,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AuthProvider } from "@/lib/AuthContext";
 import { Toaster } from "@/components/ui/toaster"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,6 +41,7 @@ export default function RootLayout({
             <OnlineStatus />
             <ScrollRange />
             {children}
+            <SpeedInsights />
             <Toaster/>
           </ThemeProvider>
         </AuthProvider>
