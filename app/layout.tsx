@@ -9,6 +9,7 @@ import OnlineStatus from "@/components/OnlineStatus";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AuthProvider } from "@/lib/AuthContext";
+import { Toaster } from "@/components/ui/toaster"
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +40,7 @@ export default function RootLayout({
             <OnlineStatus />
             <ScrollRange />
             {children}
+            <Toaster/>
           </ThemeProvider>
         </AuthProvider>
       </body>

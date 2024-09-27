@@ -29,6 +29,7 @@ import ReadText from "../custom/ReadText";
 import { useAuth } from "@/lib/AuthContext";
 import { enrollCourse } from "@/lib/actions";
 import { Progress } from "../ui/progress";
+import { Tree, Folder, File as FileTree } from "@/components/magicui/file-tree"; // Import Tree components
 
 const LoadingSkeleton = () => (
   <div className="px-6 py-4 flex flex-col gap-5 animate-pulse">
@@ -110,6 +111,8 @@ const SectionsDetails = ({
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
+  console.log(resources)
+
   return (
     <Suspense fallback={<LoadingSkeleton />}>
       {section ? (
@@ -156,18 +159,38 @@ const SectionsDetails = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5, damping: 10, stiffness: 100, type: "spring" }}
           >
-            <h2 className="text-xl font-bold mb-5">Resources</h2>
-            {resources.map((resource) => (
-              <Link
-                key={resource.id}
-                href={resource.fileUrl}
-                target="_blank"
-                className="flex items-center py-5 my-4 bg-[#9aabbda1] rounded-lg text-sm font-medium p-3"
-              >
-                <File className="h-4 w-4 mr-4" />
-                {resource.name}
-              </Link>
-            ))}
+            <Tree
+              className="p-3 overflow-hidden rounded-md bg-background"
+              initialSelectedId="1"
+              initialExpandedItems={["1"]}
+              elements={[
+                {
+                  id: "1",
+                  isSelectable: false,
+                  name: "Resources",
+                  children: resources.map((resource) => ({
+                    id: resource.id,
+                    isSelectable: true,
+                    name: resource.name,
+                    fileUrl: resource.fileUrl,
+                  })),
+                },
+              ]}
+            >
+              <Folder className="text-xl font-semibold" element="Resources" value="1">
+                {  resources.map((resource) => (
+                  <FileTree key={resource.id} value={resource.id}>
+                    <Link
+                      href={resource.fileUrl}
+                      target="_blank"
+                      className="flex items-center py-1  my-1 bg-[#9aabbda1] rounded-lg text-sm font-medium p-3"
+                    >
+                      {resource.name}
+                    </Link>
+                  </FileTree>
+                ))}
+              </Folder>
+            </Tree>
           </MotionDiv>
 
           {runConfetti && (

@@ -24,9 +24,10 @@ interface DayScheduleProps {
   days: string[];
   allTimes: TimeSlot[];
   engineers: Engineer[];
+  customSchedule: TimeSlot[]; // Add customSchedule prop
 }
 
-const DaySchedule: React.FC<DayScheduleProps> = ({ days, allTimes, engineers }) => {
+const DaySchedule: React.FC<DayScheduleProps> = ({ days, allTimes, engineers, customSchedule }) => { // Update props
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   const timesForSelectedDay = selectedDay
@@ -90,6 +91,22 @@ const DaySchedule: React.FC<DayScheduleProps> = ({ days, allTimes, engineers }) 
         <p className="text-center text-muted-foreground">
           Please select a day to see the schedules.
         </p>
+      )}
+
+      {/* Display custom schedule */}
+      {customSchedule.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-bold">Your Custom Schedule for {selectedDay}:</h3>
+          <ul>
+            {customSchedule
+              .filter(slot => slot.day === selectedDay) // Filter custom schedule by selected day
+              .map((slot) => (
+                <li key={slot.id}>
+                  {slot.day} at {format(new Date(`1970-01-01T${slot.time}`), 'h:mm a')} - {slot.place}
+                </li>
+              ))}
+          </ul>
+        </div>
       )}
     </div>
   );
