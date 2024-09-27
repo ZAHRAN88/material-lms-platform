@@ -66,7 +66,7 @@ const EngineerTimesServer = async () => {
     <div className="flex flex-col gap-3 items-center justify-center">
       <div className="text-xl font-bold">
       <TextEffect per="char" preset="fade">
-        {`Check your schedule here`}
+        {`Check and customize your schedule here`}
       </TextEffect>
       
 
