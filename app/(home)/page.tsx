@@ -8,8 +8,6 @@ import { Suspense } from "react";
 import Link from "next/link";
 import HeroSection from "@/components/home";
 import { Button } from "@mui/material";
-import { Component } from "lucide-react";
-import CategoryFetcher from "@/components/CategoryFetcher";
 
 const CourseList = async () => {
   const courses = await getCoursesByCategory(null);
@@ -50,17 +48,35 @@ const LoadingSkeleton = () => (
 );
 
 export default async function Home() {
-  const categories = await CategoryFetcher({ selectedCategory: "" });
+  const categories = await db.category.findMany({
+    orderBy: {
+      name: "asc",
+    },
+    include: {
+      subCategories: {
+        orderBy: {
+          name: "asc",
+        },
+      },
+    },
+  });
 
   return (
     <div>
-      <HeroSection />
-      <div className="md:mt-5 md:px-10 xl:px-16 pb-16">
-        {categories} {}
-        <Suspense fallback={<LoadingSkeleton />}>
-          <CourseList />
-        </Suspense>
+ {/*   <Button onClick={()=>{
+  throw Error
+}}>
+  Error
+</Button> */}
+      <HeroSection/>
+    <div className="md:mt-5 md:px-10 xl:px-16 pb-16">
+
+      <Categories categories={categories} selectedCategory={null} />
+      <Suspense fallback={<LoadingSkeleton />}>
+        <CourseList />
+      </Suspense>
       </div>
+
     </div>
   );
 }

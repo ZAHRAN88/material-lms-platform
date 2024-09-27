@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import { db } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextEffect } from "@/components/TextEffect";
+import { getStaticProps } from "@/components/EngineerFetcher"; // Import getStaticProps
 
 type TimeSlot = {
   id: string;
@@ -38,31 +38,8 @@ const LoadingSkeleton = () => (
   </Card>
 );
 
-// Fetch data at build time
-export async function getStaticProps() {
-  const engineers: Engineer[] = await db.engineer.findMany({
-    select: {
-      id: true,
-      name: true,
-      times: {
-        select: {
-          id: true,
-          day: true,
-          time: true,
-          place: true,
-          engineerId: true,
-        },
-      },
-    },
-  });
-
-  return {
-    props: {
-      engineers,
-    },
-    revalidate: 60, 
-  };
-}
+// Use the imported getStaticProps
+export { getStaticProps };
 
 const EngineerTimesServer = ({ engineers }: { engineers: Engineer[] }) => {
   return (
