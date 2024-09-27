@@ -1,10 +1,8 @@
 import { Suspense } from "react";
 import dynamic from 'next/dynamic';
-import { redirect } from "next/navigation";
 import { Clock, Book, User } from "lucide-react"; 
 
-import { db } from "@/lib/db";
-import { getUserFromToken, getCourseDetails, getCourse, getCourseWithSections, getLevelName, getInstructorName } from "@/app/actions";
+import { getCourse, getCourseWithSections, getLevelName, getInstructorName } from "@/app/actions";
 
 const ReadText = dynamic(() => import("@/components/custom/ReadText"), { ssr: false });
 const SectionMenu = dynamic(() => import("@/components/layout/SectionMenu"), { ssr: false });
@@ -28,11 +26,20 @@ interface CourseOverviewPageProps {
   params: { courseId: string };
 }
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function CourseOverviewPage({ params }: CourseOverviewPageProps) {
-  const course = await getCourse(params.courseId);
-  const sections = await getCourseWithSections(params.courseId);
-  const levelName = await getLevelName(params.courseId);
-  const instructorName = await getInstructorName(params.courseId);
+  const coursePromise = getCourse(params.courseId);
+  const sectionsPromise = getCourseWithSections(params.courseId);
+  const levelNamePromise = getLevelName(params.courseId);
+  const instructorNamePromise = getInstructorName(params.courseId);
+
+  const [course, sections, levelName, instructorName] = await Promise.all([
+    coursePromise,
+    sectionsPromise,
+    levelNamePromise,
+    instructorNamePromise
+  ]);
 
   return (
     <Suspense fallback={<LoadingSkeleton />}>
