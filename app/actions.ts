@@ -215,3 +215,85 @@ export const updateTimeSlot = async (id: string, day: string, time: string, plac
     });
     return updatedTimeSlot;
 };
+
+import { Course, User, Level, Category } from "@prisma/client";
+
+// Add this new type
+type CourseWithDetails = Course & {
+    instructor: User | null;
+    membersCount: number;
+    sectionsCount: number;
+    level: Level | null;
+    category: Category | null;
+};
+
+// Add this new action
+export async function getCourseDetails(courseId: string): Promise<CourseWithDetails | null> {
+    const course = await db.course.findUnique({
+        where: { id: courseId },
+        include: {
+            instructor: true,
+        },
+    });
+
+    if (!course) return null;
+
+    const membersCount = await db.purchase.count({ where: { courseId } });
+    const sectionsCount = await db.section.count({ where: { courseId } });
+    const level = course.levelId ? await db.level.findUnique({ where: { id: course.levelId } }) : null;
+    const category = course.categoryId ? await db.category.findUnique({ where: { id: course.categoryId } }) : null;
+
+    return {
+        ...course,
+        instructor: course.instructor,
+        membersCount,
+        sectionsCount,
+        level,
+        category,
+    };
+}
+
+
+export const getCourseWithSections = async (courseId: string) => {
+  const sections = await db.section.findMany({
+    where: {
+      courseId: courseId
+    },
+    orderBy: {
+      position: 'asc'
+    }
+  });
+
+  return sections;
+};
+export async function getCourse(courseId: string) {
+	try {
+	  const course = await db.course.findUnique({
+		where: { id: courseId },
+	  });
+  
+	  if (!course) {
+		throw new Error('Course not found');
+	  }
+  
+	  return course;
+	} catch (error) {
+	  console.error('Failed to fetch course:', error);
+	  throw error;
+	}
+  }
+  export async function getLevelName(courseId: string): Promise<string | null> {
+	const course = await db.course.findUnique({
+	  where: { id: courseId },
+	  select: { level: { select: { name: true } } },
+	});
+	return course?.level?.name ?? null;
+  }
+  
+  export async function getInstructorName(courseId: string): Promise<string | null> {
+	const course = await db.course.findUnique({
+	  where: { id: courseId },
+	  select: { instructor: { select: { name: true } } },
+	});
+	return course?.instructor?.name ?? null;
+  }

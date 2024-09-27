@@ -1,13 +1,15 @@
 import { Suspense } from "react";
-import Image from "next/image";
+import dynamic from 'next/dynamic';
 import { redirect } from "next/navigation";
+import { Clock, Book, User } from "lucide-react"; 
 
 import { db } from "@/lib/db";
-import ReadText from "@/components/custom/ReadText";
-import SectionMenu from "@/components/layout/SectionMenu";
-import { MotionDiv, MotionP } from "@/components/MotionDiv";
-import { getUserFromToken } from "@/app/actions";
-import { Clock, Book, User } from "lucide-react"; 
+import { getUserFromToken, getCourseDetails, getCourse, getCourseWithSections, getLevelName, getInstructorName } from "@/app/actions";
+
+const ReadText = dynamic(() => import("@/components/custom/ReadText"), { ssr: false });
+const SectionMenu = dynamic(() => import("@/components/layout/SectionMenu"), { ssr: false });
+const MotionDiv = dynamic(() => import("@/components/MotionDiv").then(mod => mod.MotionDiv), { ssr: false });
+const MotionP = dynamic(() => import("@/components/MotionDiv").then(mod => mod.MotionP), { ssr: false });
 
 const LoadingSkeleton = () => (
   <div className="px-6 py-4 flex flex-col gap-5 animate-pulse">
@@ -22,46 +24,15 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-const CourseOverview = async ({ params }: { params: { courseId: string } }) => {
-  const user = await getUserFromToken();
+interface CourseOverviewPageProps {
+  params: { courseId: string };
+}
 
-  if (!user) {
-    return redirect("/sign-in");
-  }
-
-  const course = await db.course.findUnique({
-    where: {
-      id: params.courseId,
-      isPublished: true,
-    },
-    include: {
-      sections: {
-        where: {
-          isPublished: true,
-        },
-      },
-      instructor: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-  });
-
-  if (!course) {
-    return redirect("/");
-  }
-
-  let level;
-
-  if (course.levelId) {
-    level = await db.level.findUnique({
-      where: {
-        id: course.levelId,
-      },
-    });
-  }
+export default async function CourseOverviewPage({ params }: CourseOverviewPageProps) {
+  const course = await getCourse(params.courseId);
+  const sections = await getCourseWithSections(params.courseId);
+  const levelName = await getLevelName(params.courseId);
+  const instructorName = await getInstructorName(params.courseId);
 
   return (
     <Suspense fallback={<LoadingSkeleton />}>
@@ -73,7 +44,7 @@ const CourseOverview = async ({ params }: { params: { courseId: string } }) => {
       >
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{course.title}</h1>
-          <SectionMenu course={course} />
+          <SectionMenu course={{ ...course, sections }} />
         </div>
 
         <MotionP
@@ -86,17 +57,18 @@ const CourseOverview = async ({ params }: { params: { courseId: string } }) => {
         </MotionP>
 
         <div className="flex flex-wrap gap-6 text-gray-700 dark:text-gray-300">
-          <div className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            <p className="font-medium">Instructor: <span className="font-normal">{course.instructor.name}</span></p>
-          </div>
-          {level && (
+          {instructorName && (
             <div className="flex items-center gap-2">
-              <Book className="w-5 h-5" />
-              <p className="font-medium">Level: <span className="font-normal">{level.name}</span></p>
+              <User className="w-5 h-5" />
+              <span>{instructorName}</span>
             </div>
           )}
-          
+          {levelName && (
+            <div className="flex items-center gap-2">
+              <Book className="w-5 h-5" />
+              <span>{`Level ${levelName}`}</span>
+            </div>
+          )}
         </div>
 
         {course.description ? (
@@ -115,5 +87,3 @@ const CourseOverview = async ({ params }: { params: { courseId: string } }) => {
     </Suspense>
   );
 };
-
-export default CourseOverview;
