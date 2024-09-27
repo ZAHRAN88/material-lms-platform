@@ -16,10 +16,9 @@ import DaySchedule from "./DaySchedule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Clock, MapPin, User } from "lucide-react"; // Make sure to install lucide-react
+import { Clock, MapPin, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-// Types
 interface TimeSlot {
   id: string;
   day: string;
@@ -42,16 +41,13 @@ interface EngineerTimesClientProps {
   engineers: Engineer[];
 }
 
-// Constants
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const LOCAL_STORAGE_KEY = "customSchedule";
 
-// Component
 const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) => {
   const [selectedEngineerId, setSelectedEngineerId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"engineer" | "day">("engineer");
   const [customSchedule, setCustomSchedule] = useState<ScheduleItem[]>(() => {
-    // Initialize state from localStorage
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
@@ -65,7 +61,6 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
     return [];
   });
 
-  // Save data to local storage whenever customSchedule changes
   useEffect(() => {
     if (customSchedule.length > 0) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(customSchedule));
@@ -96,20 +91,17 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
     setCustomSchedule(prev => {
       const existingIndex = prev.findIndex(item => item.id === timeSlot.id);
       if (existingIndex !== -1) {
-        // If the item exists, remove it
         return prev.filter((_, index) => index !== existingIndex);
       } else {
-        // Check for overlap before adding
         const hasOverlap = prev.some(item => 
-          item.day === timeSlot.day && item.time === timeSlot.time
+          item.day === timeSlot.day && item.time === timeSlot.time ||item.engineerId===timeSlot.engineerId
         );
 
         if (hasOverlap) {
           toast.error("This time slot overlaps with an existing selection. Please choose a different time.");
-          return prev; // Return previous state without changes
+          return prev;
         }
 
-        // If no overlap, add the new item
         const newItem: ScheduleItem = {
           ...timeSlot,
           engineerName: selectedEngineer.name
@@ -126,22 +118,18 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
   const saveCustomSchedule = useCallback(() => {
     const doc = new jsPDF();
     
-    // Set font
     doc.setFont("Arial Unicode MS");
 
-    // Add header
-    doc.setFillColor(52, 152, 219); // Blue color
+    doc.setFillColor(52, 152, 219);
     doc.rect(0, 0, 210, 40, "F");
-    doc.setTextColor(255, 255, 255); // White color
+    doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.text("My Custom Table", 105, 25, { align: "center" });
 
-    // Add current date
     doc.setFontSize(12);
     doc.setTextColor(255, 255, 255);
     
 
-    // Prepare table data
     const tableData = customSchedule.map(slot => [
       format(new Date(`1970-01-01T${slot.time}`), "h:mm a"),
       slot.place,
@@ -149,7 +137,6 @@ const EngineerTimesClient: React.FC<EngineerTimesClientProps> = ({ engineers }) 
       slot.day,
     ]);
 
-    // Add table
     (doc as any).autoTable({
       head: [['Time', 'Place', 'Engineer', 'Day']],
       body: tableData,
