@@ -38,8 +38,7 @@ const LoadingSkeleton = () => (
   </Card>
 );
 
-// Use the imported getStaticProps
-export { getStaticProps };
+
 
 const EngineerTimesServer = ({ engineers }: { engineers: Engineer[] }) => {
   return (
