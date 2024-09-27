@@ -1,11 +1,9 @@
-
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { db } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextEffect } from "@/components/TextEffect";
-import { revalidatePath } from "next/cache";
 
 type TimeSlot = {
   id: string;
@@ -24,11 +22,6 @@ type Engineer = {
 const EngineerTimesClient = dynamic(() => import("./EngineerTimesClient"), {
   loading: () => <LoadingSkeleton />,
 });
-async function deleteTimeSlot(timeSlotId: string) {
-  'use server';
-  await db.timeSlot.delete({ where: { id: timeSlotId } });
-  revalidatePath('/mwaead');
-}
 
 const LoadingSkeleton = () => (
   <Card className="w-full max-w-2xl mx-auto">
@@ -45,7 +38,8 @@ const LoadingSkeleton = () => (
   </Card>
 );
 
-const EngineerTimesServer = async () => {
+// Fetch data at build time
+export async function getStaticProps() {
   const engineers: Engineer[] = await db.engineer.findMany({
     select: {
       id: true,
@@ -56,32 +50,37 @@ const EngineerTimesServer = async () => {
           day: true,
           time: true,
           place: true,
-          engineerId: true, 
+          engineerId: true,
         },
       },
     },
-  }); 
+  });
 
+  return {
+    props: {
+      engineers,
+    },
+    revalidate: 60, 
+  };
+}
+
+const EngineerTimesServer = ({ engineers }: { engineers: Engineer[] }) => {
   return (
     <div className="flex flex-col gap-3 items-center justify-center">
       <div className="text-xl font-bold">
-      <TextEffect per="char" preset="fade">
-        {`Check and customize your schedule here`}
-      </TextEffect>
-      
-
+        <TextEffect per="char" preset="fade">
+          {`Check and customize your schedule here`}
+        </TextEffect>
       </div>
       <div dir="rtl" className="text-sm font-bold text-red-500">
-      <TextEffect per='word' as='p' preset='blur'>
-      {`المواعيد  لسنة  تالتة  بس`}
-    </TextEffect>
-      
-
+        <TextEffect per='word' as='p' preset='blur'>
+          {`المواعيد  لسنة  تالتة  بس`}
+        </TextEffect>
       </div>
 
-      <Card className="w-full  max-w-2xl mx-auto mt-10 ">
+      <Card className="w-full max-w-2xl mx-auto mt-10">
         <CardContent className="p-6">
-          <EngineerTimesClient engineers={engineers}  />
+          <EngineerTimesClient engineers={engineers} />
         </CardContent>
       </Card>
     </div>
