@@ -1,8 +1,8 @@
-'use client' // Error boundaries must be Client Components
+'use client'
 
 import { useEffect } from 'react';
-import { motion } from 'framer-motion'; // Import Framer Motion
-import { Button } from "@/components/ui/button"; // Import Shadcn Button
+import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
 export default function Error({
@@ -13,7 +13,6 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error(error);
   }, [error]);
 
