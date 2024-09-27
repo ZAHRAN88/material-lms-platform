@@ -1,13 +1,21 @@
-import createMiddleware from 'next-intl/middleware';
-import { localePrefix, locales } from './navigation';
+import { NextRequest, NextResponse } from 'next/server';
 
-export default createMiddleware({
-  locales,
-  localePrefix,
-  defaultLocale: 'en'
-});
+export default function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
 
-// only applies this middleware to files in the app directory
+  if (
+    pathname.startsWith('/_next') || 
+    pathname.startsWith('/api') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next();
+  }
+
+  console.log(`Processing request for: ${pathname}`);
+
+  return NextResponse.next();
+}
+
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next|.*\\..*).*)', '/']
 };
