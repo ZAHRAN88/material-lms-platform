@@ -1,24 +1,9 @@
-import { GetStaticProps, GetStaticPaths } from 'next';
-import { ParsedUrlQuery } from 'querystring';
 import { getUserFromToken } from "@/app/actions";
 import SectionsDetails from "@/components/sections/SectionsDetails";
 import { db } from "@/lib/db";
 import { Resource, Course, Section, Purchase, Progress, MuxData } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { cache } from 'react'
-
-// Extend the Params interface to include both courseId and sectionId
-interface Params extends ParsedUrlQuery {
-  courseId: string;
-  sectionId: string;
-}
-
-// Define the props interface for the page component
-interface PageProps {
-  course: Course & { sections: Section[] };
-  section: Section;
-  resources: Resource[];
-}
 
 // Cache the course fetching
 const getCachedCourse = cache(async (courseId: string) => {
@@ -48,27 +33,31 @@ const getCachedSection = cache(async (sectionId: string, courseId: string) => {
   });
 });
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const sections = await db.section.findMany({
-    where: { isPublished: true },
-    select: { id: true, courseId: true }
+// Cache the resources fetching
+const getCachedResources = cache(async (sectionId: string) => {
+  return await db.resource.findMany({
+    where: { sectionId },
   });
+});
 
-  const paths = sections.map((section) => ({
-    params: { courseId: section.courseId, sectionId: section.id },
-  }));
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Revalidate every hour
 
-  return { paths, fallback: 'blocking' };
-};
+async function SectionDetailsPage({
+  params,
+}: {
+  params: { courseId: string; sectionId: string };
+}) {
+  const { courseId, sectionId } = params;
+  const user = await getUserFromToken();
 
-export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params }) => {
-  const { courseId, sectionId } = params!;
+  if (!user) {
+    return redirect("/sign-in");
+  }
 
   const coursePromise = getCachedCourse(courseId);
   const sectionPromise = getCachedSection(sectionId, courseId);
-  const resourcesPromise = db.resource.findMany({
-    where: { sectionId },
-  });
+  const resourcesPromise = getCachedResources(sectionId);
 
   const [course, section, resources] = await Promise.all([
     coursePromise,
@@ -76,36 +65,19 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params
     resourcesPromise,
   ]);
 
-  if (!course || !section) {
-    return { notFound: true };
+  if (!course) {
+    return redirect("/");
   }
 
-  return {
-    props: {
-      course,
-      section,
-      resources,
-    },
-    revalidate: 3600, // Revalidate every hour
-  };
-};
-
-const SectionDetailsPage = async ({
-  course,
-  section,
-  resources,
-}: PageProps) => {
-  const user = await getUserFromToken();
-
-  if (!user) {
-    return redirect("/sign-in");
+  if (!section) {
+    return redirect(`/courses/${courseId}/overview`);
   }
 
   const purchasePromise = db.purchase.findUnique({
     where: {
       customerId_courseId: {
         customerId: user.id,
-        courseId: course.id,
+        courseId,
       },
     },
   });
@@ -114,22 +86,23 @@ const SectionDetailsPage = async ({
     where: {
       studentId_sectionId: {
         studentId: user.id,
-        sectionId: section.id,
+        sectionId,
       },
     },
   });
 
-  const muxDataPromise = db.muxData.findUnique({
-    where: {
-      sectionId: section.id,
-    },
-  });
+  const purchase = await purchasePromise;
 
-  const [purchase, progress, muxData] = await Promise.all([
-    purchasePromise,
-    progressPromise,
-    muxDataPromise,
-  ]);
+  let muxData: MuxData | null = null;
+  if (section.isFree || purchase) {
+    muxData = await db.muxData.findUnique({
+      where: {
+        sectionId,
+      },
+    });
+  }
+
+  const progress = await progressPromise;
 
   return (
     <SectionsDetails
@@ -142,6 +115,6 @@ const SectionDetailsPage = async ({
       progress={progress}
     />
   );
-};
+}
 
 export default SectionDetailsPage;
