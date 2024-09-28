@@ -1,5 +1,4 @@
-
-import { Suspense } from "react";
+import { Suspense, memo } from "react"; // Import memo
 import dynamic from "next/dynamic";
 import { db } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,28 +22,28 @@ type Engineer = {
 
 const EngineerTimesClient = dynamic(() => import("./EngineerTimesClient"), {
   loading: () => <LoadingSkeleton />,
+  ssr: false, // Disable server-side rendering for this component
 });
-async function deleteTimeSlot(timeSlotId: string) {
-  'use server';
-  await db.timeSlot.delete({ where: { id: timeSlotId } });
-  revalidatePath('/mwaead');
-}
 
-const LoadingSkeleton = () => (
-  <Card className="w-full max-w-2xl mx-auto">
-    <CardContent className="p-6">
-      <Skeleton className="h-8 w-3/4 mb-4" />
-      {[...Array(5)].map((_, index) => (
-        <div key={index} className="space-y-2 mb-4">
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-        </div>
-      ))}
-    </CardContent>
-  </Card>
-);
+// Memoize the LoadingSkeleton component
+const LoadingSkeleton = memo(function LoadingSkeleton() { // Added display name
+  return (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardContent className="p-6">
+        <Skeleton className="h-8 w-3/4 mb-4" />
+        {[...Array(5)].map((_, index) => (
+          <div key={index} className="space-y-2 mb-4">
+            <Skeleton className="h-6 w-1/2" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+});
 
+// Optimize the server function
 const EngineerTimesServer = async () => {
   const engineers: Engineer[] = await db.engineer.findMany({
     select: {
@@ -56,11 +55,11 @@ const EngineerTimesServer = async () => {
           day: true,
           time: true,
           place: true,
-          engineerId: true, 
+          engineerId: true,
         },
       },
     },
-  }); 
+  });
 
   return (
     <div className="flex flex-col gap-3 items-center justify-center">
