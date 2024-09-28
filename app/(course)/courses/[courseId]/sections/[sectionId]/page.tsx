@@ -1,12 +1,26 @@
+import { GetStaticProps, GetStaticPaths } from 'next';
+import { ParsedUrlQuery } from 'querystring';
 import { getUserFromToken } from "@/app/actions";
 import SectionsDetails from "@/components/sections/SectionsDetails";
 import { db } from "@/lib/db";
-import { Resource } from "@prisma/client";
+import { Resource, Course, Section, Purchase, Progress, MuxData } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { cache } from 'react'
 
-export const revalidate = 3600; // Revalidate every hour
+// Extend the Params interface to include both courseId and sectionId
+interface Params extends ParsedUrlQuery {
+  courseId: string;
+  sectionId: string;
+}
 
+// Define the props interface for the page component
+interface PageProps {
+  course: Course & { sections: Section[] };
+  section: Section;
+  resources: Resource[];
+}
+
+// Cache the course fetching
 const getCachedCourse = cache(async (courseId: string) => {
   return await db.course.findUnique({
     where: {
@@ -23,6 +37,7 @@ const getCachedCourse = cache(async (courseId: string) => {
   });
 });
 
+// Cache the section fetching
 const getCachedSection = cache(async (sectionId: string, courseId: string) => {
   return await db.section.findUnique({
     where: {
@@ -33,36 +48,64 @@ const getCachedSection = cache(async (sectionId: string, courseId: string) => {
   });
 });
 
+export const getStaticPaths: GetStaticPaths = async () => {
+  const sections = await db.section.findMany({
+    where: { isPublished: true },
+    select: { id: true, courseId: true }
+  });
+
+  const paths = sections.map((section) => ({
+    params: { courseId: section.courseId, sectionId: section.id },
+  }));
+
+  return { paths, fallback: 'blocking' };
+};
+
+export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params }) => {
+  const { courseId, sectionId } = params!;
+
+  const coursePromise = getCachedCourse(courseId);
+  const sectionPromise = getCachedSection(sectionId, courseId);
+  const resourcesPromise = db.resource.findMany({
+    where: { sectionId },
+  });
+
+  const [course, section, resources] = await Promise.all([
+    coursePromise,
+    sectionPromise,
+    resourcesPromise,
+  ]);
+
+  if (!course || !section) {
+    return { notFound: true };
+  }
+
+  return {
+    props: {
+      course,
+      section,
+      resources,
+    },
+    revalidate: 3600, // Revalidate every hour
+  };
+};
+
 const SectionDetailsPage = async ({
-  params,
-}: {
-  params: { courseId: string; sectionId: string };
-}) => {
-  const { courseId, sectionId } = params;
+  course,
+  section,
+  resources,
+}: PageProps) => {
   const user = await getUserFromToken();
 
   if (!user) {
     return redirect("/sign-in");
   }
 
-  const coursePromise = getCachedCourse(courseId);
-  const sectionPromise = getCachedSection(sectionId, courseId);
-
-  const [course, section] = await Promise.all([coursePromise, sectionPromise]);
-
-  if (!course) {
-    return redirect("/");
-  }
-
-  if (!section) {
-    return redirect(`/courses/${courseId}/overview`);
-  }
-
   const purchasePromise = db.purchase.findUnique({
     where: {
       customerId_courseId: {
         customerId: user.id,
-        courseId,
+        courseId: course.id,
       },
     },
   });
@@ -71,31 +114,22 @@ const SectionDetailsPage = async ({
     where: {
       studentId_sectionId: {
         studentId: user.id,
-        sectionId,
+        sectionId: section.id,
       },
     },
   });
 
-  const [purchase, progress] = await Promise.all([purchasePromise, progressPromise]);
+  const muxDataPromise = db.muxData.findUnique({
+    where: {
+      sectionId: section.id,
+    },
+  });
 
-  let muxData = null;
-  let resources: Resource[] = [];
-
-  if (section.isFree || purchase) {
-    muxData = await db.muxData.findUnique({
-      where: {
-        sectionId,
-      },
-    });
-  }
-
-  if (section.isFree) {
-    resources = await db.resource.findMany({
-      where: {
-        sectionId,
-      },
-    });
-  }
+  const [purchase, progress, muxData] = await Promise.all([
+    purchasePromise,
+    progressPromise,
+    muxDataPromise,
+  ]);
 
   return (
     <SectionsDetails

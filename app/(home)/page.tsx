@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic'; // Import dynamic for lazy loading
+import dynamic from 'next/dynamic';
 import { db } from "@/lib/db";
 import getCoursesByCategory from "../actions/getCourses";
 import Categories from "@/components/custom/Categories";
@@ -9,7 +9,7 @@ import { Suspense } from "react";
 import HeroSection from "@/components/home";
 
 const CourseList = dynamic(() => import('@/components/courses/CourseList'), {
-  loading: () => <LoadingSkeleton />, // Use LoadingSkeleton as fallback
+  loading: () => <LoadingSkeleton />,
 });
 
 const LoadingSkeleton = () => (
