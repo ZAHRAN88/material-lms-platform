@@ -1,7 +1,7 @@
 import { getUserFromToken } from "@/app/actions";
 import SectionsDetails from "@/components/sections/SectionsDetails";
 import { db } from "@/lib/db";
-import { Resource, Course, Section, Purchase, Progress, MuxData } from "@prisma/client";
+import { Resource, Course, Section, Purchase, Progress, MuxData, Question } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { cache } from 'react'
 
@@ -40,6 +40,13 @@ const getCachedResources = cache(async (sectionId: string) => {
   });
 });
 
+// Cache the questions fetching
+const getCachedQuestions = cache(async (sectionId: string) => {
+  return await db.question.findMany({
+    where: { sectionId },
+  });
+});
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour
 
@@ -58,11 +65,13 @@ async function SectionDetailsPage({
   const coursePromise = getCachedCourse(courseId);
   const sectionPromise = getCachedSection(sectionId, courseId);
   const resourcesPromise = getCachedResources(sectionId);
+  const questionsPromise = getCachedQuestions(sectionId); // Fetch questions
 
-  const [course, section, resources] = await Promise.all([
+  const [course, section, resources, questions] = await Promise.all([
     coursePromise,
     sectionPromise,
     resourcesPromise,
+    questionsPromise, // Include questions in the promises
   ]);
 
   if (!course) {
@@ -106,7 +115,7 @@ async function SectionDetailsPage({
 
   return (
     <SectionsDetails
-      path=""
+    path=""
       course={course}
       section={section}
       purchase={purchase}

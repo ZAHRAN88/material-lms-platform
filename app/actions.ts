@@ -5,6 +5,7 @@ import { db } from "../lib/db"
 import { compare } from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from 'next/headers';
+import { Question } from "@prisma/client"; // Import Question model
 
 const buyCourse = async (formData: FormData) => {
    await db.purchase.create({
@@ -297,3 +298,19 @@ export async function getCourse(courseId: string) {
 	});
 	return course?.instructor?.name ?? null;
   }
+
+// Add this new action
+export const addQuestionToSection = async (formData: FormData, sectionId: string): Promise<Question> => {
+    const questionText = formData.get('question') as string;
+    const questionAns = formData.get('answer') as string;
+	
+    const question = await db.question.create({
+        data: {
+            answer: questionAns, 
+            sectionId: sectionId,
+            text: questionText 
+        },
+    });
+
+    return question;
+};

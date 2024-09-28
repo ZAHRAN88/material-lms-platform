@@ -260,10 +260,10 @@ enum Role {
 // Add this new model
 model Question {
   id                String   @id @default(uuid()) @map("_id")
-  text              String
   answer            String
-  incorrectAnswers  String[]
+  text               String
   section           Section  @relation(fields: [sectionId], references: [id])
   sectionId         String   @unique
+  incorrectAnswers   String[] 
 }
 

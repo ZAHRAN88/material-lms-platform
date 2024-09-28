@@ -12,6 +12,7 @@ interface ProgressButtonProps {
   courseId: string;
   sectionId: string;
   isCompleted: boolean;
+  onClick?: () => void; // Optional onClick handler
 }
 
 const ProgressButton = ({

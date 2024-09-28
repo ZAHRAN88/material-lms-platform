@@ -28,6 +28,9 @@ import { Switch } from "@/components/ui/switch";
 import ResourceForm from "@/components/sections/ResourceForm";
 import Delete from "@/components/custom/Delete";
 import PublishButton from "@/components/custom/PublishButton";
+import { useState } from "react"; // Add this import
+import { addQuestionToSection } from "@/app/actions";
+import MCQForm from "./MCQForm"; // Import the new MCQForm component
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -66,6 +69,8 @@ const EditSectionForm = ({
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Prevent section update when adding a question
+    if (values.title === "" && values.description === "") return; // Skip if no section data is provided
     try {
       await axios.post(
         `/api/courses/${courseId}/sections/${section.id}`,
@@ -76,6 +81,31 @@ const EditSectionForm = ({
     } catch (err) {
       console.log("Failed to update the section", err);
       toast.error("Something went wrong!");
+    }
+  };
+
+  // 3. State for question form (updated for MCQ)
+  const [question, setQuestion] = useState({ text: "", options: ["", "", "", ""], answer: "" });
+
+  // 4. Handle question submission
+  const handleAddQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("question", question.text);
+    formData.append("answer", question.answer);
+    question.options.forEach((option, index) => {
+      formData.append(`option${index + 1}`, option); // Append each option
+    });
+
+    try {
+      const response = await addQuestionToSection(formData, section.id); // Call the action
+      console.log("Response from adding question:", response); // Log the response
+      toast.success("Question added successfully");
+      setQuestion({ text: "", options: ["", "", "", ""], answer: "" }); // Reset form
+    } catch (err) {
+      console.error("Failed to add question", err); // Log the error
+      const errorMessage = (err as any).response?.data?.message || "Something went wrong!"; // Assert 'err' as 'any'
+      toast.error(errorMessage);
     }
   };
 
@@ -219,6 +249,9 @@ const EditSectionForm = ({
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
         <ResourceForm section={section} courseId={courseId} />
       </div>
+
+      {/* Use the new MCQForm component */}
+      <MCQForm sectionId={section.id} />
     </div>
   );
 };
