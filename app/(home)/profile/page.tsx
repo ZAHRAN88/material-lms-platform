@@ -157,7 +157,7 @@ export default function UserCourseProgress() {
             You have not enrolled in any courses yet.
           </h2>
           <Button>
-            <Link href="/courses">Browse Courses</Link>
+            <Link href="/">Browse Courses</Link>
           </Button>{" "}
         </div>
       )}
