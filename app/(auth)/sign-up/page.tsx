@@ -23,7 +23,7 @@ const signUpSchema = z.object({
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .max(20, 'Password must be at most 20 characters')
-    .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/, 
+    .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, 
       'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
