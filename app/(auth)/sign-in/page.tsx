@@ -63,7 +63,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative transition-opacity duration-300 ${isExiting ? 'opacity-0' : 'opacity-100'} bg-gray-900 text-white`}>
+    <div className={`min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative transition-opacity duration-300 ${isExiting ? 'opacity-0' : 'opacity-100'}  text-white`}>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover /> {}
       <div className="absolute top-0 left-0 w-full h-full -z-10 bg-opacity-30">
         {}
