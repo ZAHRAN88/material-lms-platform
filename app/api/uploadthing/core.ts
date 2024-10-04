@@ -18,7 +18,7 @@ export const ourFileRouter = {
   sectionVideo: f({ video: { maxFileSize: "512GB", maxFileCount: 1 } })
     .middleware(handleAuth)
     .onUploadComplete(() => {}),
-  sectionResource: f(["text", "image", "video", "audio", "pdf"])
+  sectionResource: f(["text", "image", "video", "audio", "pdf","blob"])
     .middleware(handleAuth)
     .onUploadComplete(() => {}),
 } satisfies FileRouter;
