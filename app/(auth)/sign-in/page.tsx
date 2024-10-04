@@ -63,7 +63,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative  transition-opacity duration-300 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
+    <div className={`min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative transition-opacity duration-300 ${isExiting ? 'opacity-0' : 'opacity-100'} bg-gray-900 text-white`}>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover /> {}
       <div className="absolute top-0 left-0 w-full h-full -z-10 bg-opacity-30">
         {}
@@ -72,10 +72,10 @@ export default function SignInPage() {
         <h1 className="text-4xl font-bold text-white mb-2">Welcome to Your Material LMS!</h1>
         <p className="text-white">Sign in to access your personalized learning experience.</p>
       </div>
-      <Card className="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden">
+      <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-gray-800">Sign in to Material</CardTitle>
-          <CardDescription className="text-center text-gray-400">
+          <CardTitle className="text-2xl font-bold text-center text-gray-800 dark:text-gray-200">Sign in to Material</CardTitle>
+          <CardDescription className="text-center text-gray-400 dark:text-gray-400">
             Welcome back! Please sign in to continue
           </CardDescription>
         </CardHeader>
@@ -87,7 +87,7 @@ export default function SignInPage() {
                 {...register('email')}
                 type="email"
                 placeholder="Email address"
-                className="bg-gray-100 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isLoading}
               />
               {errors.email && <p className="text-sm text-red-500 font-semibold" aria-live="assertive">{errors.email.message}</p>}
@@ -98,7 +98,7 @@ export default function SignInPage() {
                 {...register('password')}
                 type="password"
                 placeholder="Password"
-                className="bg-gray-100 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isLoading}
               />
               {errors.password && <p className="text-sm text-red-500 font-semibold" aria-live="assertive">{errors.password.message}</p>}
@@ -110,7 +110,7 @@ export default function SignInPage() {
           </form>
         </CardContent>
         <CardFooter>
-          <p className="text-sm text-center w-full text-gray-600">
+          <p className="text-sm text-center w-full text-gray-600 dark:text-gray-400">
             Don&apos;t have an account?{' '}
             <Link href="/sign-up" className="text-blue-500 hover:underline">
               Sign up
