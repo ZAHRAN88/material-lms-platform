@@ -24,7 +24,7 @@ const signUpSchema = z.object({
     .min(8, 'Password must be at least 8 characters')
     .max(20, 'Password must be at most 20 characters')
     .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, 
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
+      'Password should include 1 character , 1 number ex: Asdf1234 .. AS SIMPLE AS THAT!!!!!!'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
