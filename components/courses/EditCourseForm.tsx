@@ -209,6 +209,7 @@ const EditCourseForm = ({
                   <div className="mt-2 rounded-md shadow-sm">
                     <RichEditor
                       placeholder="What is this course about?"
+                      language="en" // {{ edit_1 }} Add the required language prop
                       className="block w-full rounded-md border-0 dark:placeholder:text-gray-400 py-1.5 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6"
                       toolbarClassName="border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
                       editorClassName="prose dark:prose-invert max-w-none min-h-[200px] p-4 focus:outline-none"

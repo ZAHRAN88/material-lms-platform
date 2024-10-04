@@ -11,13 +11,24 @@ interface RichEditorProps {
   className?: string;
   toolbarClassName?: string;
   editorClassName?: string;
+  language: 'ar' | 'en';
 }
 
-const RichEditor = ({ placeholder, onChange, value, className, toolbarClassName, editorClassName }: RichEditorProps) => {
+const RichEditor = ({ 
+  placeholder, 
+  onChange, 
+  value, 
+  className, 
+  toolbarClassName, 
+  editorClassName,
+  language
+}: RichEditorProps) => {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
     []
   );
+
+  const isRTL = language === 'ar';
 
   const modules = {
     toolbar: [
@@ -25,12 +36,13 @@ const RichEditor = ({ placeholder, onChange, value, className, toolbarClassName,
       ['bold', 'italic', 'underline', 'strike'],
       [{ list: 'ordered' }, { list: 'bullet' }],
       ['link', 'image'],
+      [{ 'direction': 'rtl' }],
       ['clean'],
     ],
   };
 
   return (
-    <div className={`rich-editor-wrapper ${className}`}>
+    <div className={`rich-editor-wrapper ${className} ${isRTL ? 'rtl' : 'ltr'}`}>
       <ReactQuill
         theme="snow"
         placeholder={placeholder}
@@ -95,6 +107,19 @@ const RichEditor = ({ placeholder, onChange, value, className, toolbarClassName,
         .dark .rich-editor-wrapper .ql-snow.ql-toolbar button.ql-active,
         .dark .rich-editor-wrapper .ql-snow.ql-toolbar button.ql-active {
           color: #3b82f6;
+        }
+        .rich-editor-wrapper.rtl .ql-editor {
+          direction: rtl;
+          text-align: right;
+        }
+        .rich-editor-wrapper.rtl .ql-align-center {
+          text-align: center;
+        }
+        .rich-editor-wrapper.rtl .ql-align-right {
+          text-align: left;
+        }
+        .rich-editor-wrapper.rtl .ql-align-left {
+          text-align: right;
         }
       `}</style>
     </div>

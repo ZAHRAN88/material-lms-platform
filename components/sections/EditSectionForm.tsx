@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, Loader2, Trash } from "lucide-react";
 import MuxPlayer from "@mux/mux-player-react";
-
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -28,9 +28,9 @@ import { Switch } from "@/components/ui/switch";
 import ResourceForm from "@/components/sections/ResourceForm";
 import Delete from "@/components/custom/Delete";
 import PublishButton from "@/components/custom/PublishButton";
-import { useState } from "react"; // Add this import
+import { useState } from "react";
 import { addQuestionToSection } from "@/app/actions";
-import MCQForm from "./MCQForm"; // Import the new MCQForm component
+import MCQForm from "./MCQForm";
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -54,7 +54,6 @@ const EditSectionForm = ({
 }: EditSectionFormProps) => {
   const router = useRouter();
 
-  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,10 +66,8 @@ const EditSectionForm = ({
 
   const { isValid, isSubmitting } = form.formState;
 
-  // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // Prevent section update when adding a question
-    if (values.title === "" && values.description === "") return; // Skip if no section data is provided
+    if (values.title === "" && values.description === "") return;
     try {
       await axios.post(
         `/api/courses/${courseId}/sections/${section.id}`,
@@ -84,29 +81,38 @@ const EditSectionForm = ({
     }
   };
 
-  // 3. State for question form (updated for MCQ)
-  const [question, setQuestion] = useState({ text: "", options: ["", "", "", ""], answer: "" });
+  const [question, setQuestion] = useState({
+    text: "",
+    options: ["", "", "", ""],
+    answer: "",
+  });
 
-  // 4. Handle question submission
   const handleAddQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("question", question.text);
     formData.append("answer", question.answer);
     question.options.forEach((option, index) => {
-      formData.append(`option${index + 1}`, option); // Append each option
+      formData.append(`option${index + 1}`, option);
     });
 
     try {
-      const response = await addQuestionToSection(formData, section.id); // Call the action
-      console.log("Response from adding question:", response); // Log the response
+      const response = await addQuestionToSection(formData, section.id);
+      console.log("Response from adding question:", response);
       toast.success("Question added successfully");
-      setQuestion({ text: "", options: ["", "", "", ""], answer: "" }); // Reset form
+      setQuestion({ text: "", options: ["", "", "", ""], answer: "" });
     } catch (err) {
-      console.error("Failed to add question", err); // Log the error
-      const errorMessage = (err as any).response?.data?.message || "Something went wrong!"; // Assert 'err' as 'any'
+      console.error("Failed to add question", err);
+      const errorMessage =
+        (err as any).response?.data?.message || "Something went wrong!";
       toast.error(errorMessage);
     }
+  };
+
+  const [editorLanguage, setEditorLanguage] = useState<"en" | "ar">("en");
+
+  const switchLanguage = () => {
+    setEditorLanguage((prev) => (prev === "en" ? "ar" : "ar"));
   };
 
   return (
@@ -120,22 +126,18 @@ const EditSectionForm = ({
         </Link>
 
         <div className="flex gap-3 items-center">
-          {/* <PublishButton
-            disabled={!isCompleted}
-            courseId={courseId}
-            sectionId={section.id}
-            isPublished={section.isPublished}
-            page="Section"
-          /> */}
+          {}
           <Delete item="section" courseId={courseId} sectionId={section.id} />
         </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
-        <h1 className="text-2xl font-bold mb-2 dark:text-white">Section Details</h1>
+        <h1 className="text-2xl font-bold mb-2 dark:text-white">
+          Section Details
+        </h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-          Complete this section with detailed information, good 
-          resources to give  students the best learning experience
+          Complete this section with detailed information, good resources to
+          give students the best learning experience
         </p>
 
         <Form {...form}>
@@ -167,10 +169,25 @@ const EditSectionForm = ({
                   <FormLabel>
                     Description <span className="text-red-500">*</span>
                   </FormLabel>
+                  <div className="flex items-center space-x-2 mb-2">
+                    {/* <Switch
+                      checked={editorLanguage === "ar"}
+                      onCheckedChange={() =>
+                        setEditorLanguage(editorLanguage === "en" ? "ar" : "en")
+                      }
+                    />
+                    <Label htmlFor="language-switch">
+                      {editorLanguage === "en"
+                        ? "Switch to Arabic"
+                        : "Switch to English"}
+                    </Label> */}
+                  </div>
                   <FormControl>
                     <RichEditor
                       placeholder="What is this section about?"
-                      {...field}
+                      value={field.value}
+                      language={editorLanguage as "en" | "ar"}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -180,14 +197,15 @@ const EditSectionForm = ({
 
             {section.videoUrl && (
               <div className="my-6">
-                <h2 className="text-lg font-semibold mb-2 dark:text-white">Preview Video</h2>
+                <h2 className="text-lg font-semibold mb-2 dark:text-white">
+                  Preview Video
+                </h2>
                 <MuxPlayer
                   playbackId={section.muxData?.playbackId || ""}
                   className="w-full aspect-video rounded-lg shadow-sm"
                 />
               </div>
             )}
-           
 
             <FormField
               control={form.control}
@@ -231,7 +249,7 @@ const EditSectionForm = ({
         <ResourceForm section={section} courseId={courseId} />
       </div>
 
-      {/* Use the new MCQForm component */}
+      {}
       <MCQForm sectionId={section.id} />
     </div>
   );
