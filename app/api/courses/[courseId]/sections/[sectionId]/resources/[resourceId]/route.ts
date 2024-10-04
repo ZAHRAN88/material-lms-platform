@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserFromToken } from "@/app/actions";
+
 export const DELETE = async (
   req: NextRequest,
   { params }: { params: { courseId: string; sectionId: string; resourceId: string } }
@@ -36,10 +37,20 @@ export const DELETE = async (
       return new NextResponse("Section Not Found", { status: 404 });
     }
 
+    // Ensure the resource exists before trying to delete it
+    const resource = await db.resource.findUnique({
+      where: {
+        id: resourceId,
+      },
+    });
+
+    if (!resource) {
+      return new NextResponse("Resource Not Found", { status: 404 });
+    }
+
     await db.resource.delete({
       where: {
         id: resourceId,
-        sectionId,
       },
     });
     

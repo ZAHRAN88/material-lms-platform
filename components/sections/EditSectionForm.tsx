@@ -187,26 +187,7 @@ const EditSectionForm = ({
                 />
               </div>
             )}
-            {/* <FormField
-              control={form.control}
-              name="videoUrl"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>
-                    Video <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <FileUpload
-                      value={field.value || ""}
-                      onChange={(url) => field.onChange(url)}
-                      endpoint="sectionVideo"
-                      page="Edit Section"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
+           
 
             <FormField
               control={form.control}

@@ -68,9 +68,7 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
 
   const onDelete = async (id: string) => {
     try {
-      await axios.post(
-        `/api/courses/${courseId}/sections/${section.id}/resources/${id}`
-      );
+      await axios.delete(`/api/courses/${courseId}/sections/${section.id}/resources/${id}`); // Use DELETE method
       toast.success("Resource deleted!");
       router.refresh();
     } catch (err) {
