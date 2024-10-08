@@ -18,7 +18,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 
 const signInSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  password: z.string()
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
@@ -39,8 +39,11 @@ export default function SignInPage() {
     setIsLoading(true);
     setIsExiting(false);
 
+    // {{ edit_1 }} Set default password if not provided
+    const passwordToUse = data.password.trim() === '' ? 'Material2024' : data.password;
+
     try {
-      const result = await signIn(data.email, data.password);
+      const result = await signIn(data.email, passwordToUse); // {{ edit_2 }} Use the determined password
       if (result.success && result.user) {
         setUser({
           id: result.user.id,
@@ -69,7 +72,7 @@ export default function SignInPage() {
         {}
       </div>
       <div className="text-center mb-8 z-10">
-        <h1 className="text-4xl font-bold text-white mb-2">Welcome to Your Material LMS!</h1>
+        <h1 className="text-4xl font-bold dark:text-white text-gray-800 mb-2">Welcome to Your Material LMS!</h1>
         <p className="text-white">Sign in to access your personalized learning experience.</p>
       </div>
       <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">

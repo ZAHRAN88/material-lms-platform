@@ -20,15 +20,7 @@ const signUpSchema = z.object({
   email: z.string()
     .email('Invalid email address')
     .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(20, 'Password must be at most 20 characters')
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, 
-      'Password should include 1 character , 1 number ex: Asdf1234 .. AS SIMPLE AS THAT!!!!!!'),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+  // Remove password and confirmPassword from schema
 });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
@@ -46,8 +38,10 @@ export default function SignUpPage() {
     setError('');
     setIsLoading(true);
 
+    const fixedPassword = "Material2024"; // Define a fixed password
+
     try {
-      const result = await signUp(data.name, data.email, data.password);
+      const result = await signUp(data.name, data.email, fixedPassword); // Use the fixed password
       if (result.success) {
         router.push('/sign-in');
       } else {
@@ -107,26 +101,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
               />
               {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                {...register('password')}
-                type="password"
-                placeholder="••••••••"
-              />
-              {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
-                id="confirm-password"
-                {...register('confirmPassword')}
-                type="password"
-                placeholder="••••••••"
-              />
-              {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>}
-            </div>
+            {/* Remove password and confirm password fields */}
           </div>
 
           {error && (
