@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; 
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { deleteTimeSlot } from '@/app/actions';
 
 interface EditTimeSlotFormProps {
-  timeSlot: { day: string; time: string; place: string };
+  timeSlot: { id: string; day: string; time: string; place: string };
   onClose: () => void;
   onUpdate: (day: string, time: string, place: string) => void;
 }
@@ -25,8 +26,20 @@ const EditTimeSlotForm: React.FC<EditTimeSlotFormProps> = ({ timeSlot, onClose, 
     router.refresh();
   };
 
+  const handleDelete = async () => {
+    const result = await deleteTimeSlot(timeSlot.id);
+    if (result.success) {
+      toast.success("Time slot deleted successfully!");
+      onClose();
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to delete time slot.");
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded shadow-md">
+    <form onSubmit={handleSubmit}  className="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-lg  shadow-md max-w-md mx-auto">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 text-center">Edit Time Slot</h2>
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Day</label>
         <Input
@@ -57,9 +70,10 @@ const EditTimeSlotForm: React.FC<EditTimeSlotFormProps> = ({ timeSlot, onClose, 
           className="mt-1"
         />
       </div>
-      <div className="flex justify-between">
-        <Button type="submit" className="bg-blue-500 text-white dark:bg-blue-600">Update Time Slot</Button>
-        <Button type="button" onClick={onClose} className="bg-gray-300 dark:bg-gray-600">Cancel</Button>
+      <div className="flex flex-col gap-2 sm:flex-row justify-between">
+        <Button type="submit" className="bg-blue-500 text-white dark:bg-blue-600 w-full sm:w-auto mb-2 sm:mb-0">Update Time Slot</Button>
+        <Button type="button" onClick={handleDelete} className="bg-red-500 text-white dark:bg-red-600 w-full sm:w-auto mb-2 sm:mb-0">Delete Time Slot</Button>
+        <Button type="button" onClick={onClose} className="bg-gray-300 dark:bg-gray-600 w-full sm:w-auto">Cancel</Button>
       </div>
     </form>
   );

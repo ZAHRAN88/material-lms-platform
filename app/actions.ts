@@ -314,3 +314,15 @@ export const addQuestionToSection = async (formData: FormData, sectionId: string
 
     return question;
 };
+
+export const deleteTimeSlot = async (id: string) => {
+    try {
+        await db.timeSlot.delete({
+            where: { id },
+        });
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to delete time slot:', error);
+        return { success: false, error: 'An error occurred while deleting the time slot' };
+    }
+};

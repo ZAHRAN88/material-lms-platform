@@ -176,7 +176,7 @@ const EngineerList: React.FC<EngineerListProps> = ({ engineers: initialEngineers
                                   Edit Time
                                 </Button>
                                 <Dialog open={isEditTimeSlotOpen && selectedTimeSlot?.day === time.day && selectedTimeSlot?.time === time.time} onOpenChange={setIsEditTimeSlotOpen}>
-                                  <DialogContent className="sm:max-w-[425px]">
+                                  <DialogContent className="sm:max-w-[600px]">
                                     <DialogHeader>
                                       <DialogTitle>Edit Time Slot</DialogTitle>
                                     </DialogHeader>
