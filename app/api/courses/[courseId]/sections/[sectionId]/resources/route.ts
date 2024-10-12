@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserFromToken } from "@/app/actions";
+
 export const POST = async (
   req: NextRequest,
   { params }: { params: { courseId: string; sectionId: string } }
@@ -36,14 +37,16 @@ export const POST = async (
       return new NextResponse("Section Not Found", { status: 404 });
     }
 
-    const { name, fileUrl } = await req.json();
+    const { name, fileUrl, link } = await req.json();
+
+    const resourceData = {
+      name,
+      fileUrl: link || fileUrl,
+      sectionId,
+    };
 
     const resource = await db.resource.create({
-      data: {
-        name,
-        fileUrl,
-        sectionId,
-      },
+      data: resourceData,
     });
 
     return NextResponse.json(resource, { status: 200 });

@@ -50,10 +50,10 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
   const { isValid, isSubmitting } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Prepare resource data for submission
     const resourceData = {
       name: values.name,
-      fileUrl: values.fileUrl,
-      link: values.link || values.fileUrl,
+      fileUrl: values.link || values.fileUrl, // Set fileUrl to link if provided, otherwise keep the uploaded fileUrl
     };
 
     try {
@@ -144,7 +144,6 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
               )}
             />
 
-            {}
             <div className="flex flex-col">
               <FormLabel>Resource Type</FormLabel>
               <div className="flex gap-4">
@@ -178,7 +177,6 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
               </div>
             </div>
 
-            {}
             <FormField
               control={form.control}
               name="fileUrl"
@@ -206,7 +204,6 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
             <FormField
               control={form.control}
               name="link"
-              
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Resource Link</FormLabel>
