@@ -26,9 +26,8 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name is required and must be at least 2 characters long",
   }),
-  fileUrl: z.string().min(1, {
-    message: "File is required",
-  }),
+  fileUrl: z.string().optional(),
+  link: z.string().url("Must be a valid URL").optional(),
 });
 
 interface ResourceFormProps {
@@ -39,23 +38,28 @@ interface ResourceFormProps {
 const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
   const router = useRouter();
 
-  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       fileUrl: "",
+      link: "",
     },
   });
 
   const { isValid, isSubmitting } = form.formState;
 
-  // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const resourceData = {
+      name: values.name,
+      fileUrl: values.fileUrl,
+      link: values.link || values.fileUrl,
+    };
+
     try {
       await axios.post(
         `/api/courses/${courseId}/sections/${section.id}/resources`,
-        values
+        resourceData
       );
       toast.success("New Resource uploaded!");
       form.reset();
@@ -68,7 +72,9 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
 
   const onDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/courses/${courseId}/sections/${section.id}/resources/${id}`); // Use DELETE method
+      await axios.delete(
+        `/api/courses/${courseId}/sections/${section.id}/resources/${id}`
+      );
       toast.success("Resource deleted!");
       router.refresh();
     } catch (err) {
@@ -90,10 +96,20 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
 
       <div className="mt-5 flex flex-col gap-5">
         {section.resources.map((resource) => (
-          <div key={resource.id} className="flex justify-between bg-[#9aabbda1] rounded-lg text-sm font-medium p-3">
+          <div
+            key={resource.id}
+            className="flex justify-between bg-[#9aabbda1] rounded-lg text-sm font-medium p-3"
+          >
             <div className="flex items-center">
               <File className="h-4 w-4 mr-4" />
-              {resource.name}
+              <a
+                href={resource.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {resource.name}
+              </a>
             </div>
             <button
               className="text-[#003285] text-white"
@@ -119,7 +135,7 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>File Name</FormLabel>
+                  <FormLabel>Resource Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Ex: Textbook" {...field} />
                   </FormControl>
@@ -128,6 +144,41 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
               )}
             />
 
+            {}
+            <div className="flex flex-col">
+              <FormLabel>Resource Type</FormLabel>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="file"
+                    name="resourceType"
+                    onChange={() => {
+                      form.setValue("fileUrl", "");
+                      form.setValue("link", "");
+                    }}
+                    className="mr-2"
+                    defaultChecked
+                  />
+                  Upload File
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="link"
+                    name="resourceType"
+                    onChange={() => {
+                      form.setValue("fileUrl", "");
+                      form.setValue("link", "");
+                    }}
+                    className="mr-2"
+                  />
+                  Add Link
+                </label>
+              </div>
+            </div>
+
+            {}
             <FormField
               control={form.control}
               name="fileUrl"
@@ -147,7 +198,29 @@ const ResourceForm = ({ section, courseId }: ResourceFormProps) => {
               )}
             />
 
-            <Button type="submit" disabled={!isValid || isSubmitting}>
+            <FormField
+              control={form.control}
+              name="link"
+              
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Resource Link</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: https://example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type="submit"
+              disabled={
+                !isValid ||
+                isSubmitting ||
+                (!form.getValues("fileUrl") && !form.getValues("link"))
+              }
+            >
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
