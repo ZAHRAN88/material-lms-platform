@@ -35,7 +35,7 @@ const CourseCard = async ({ course }: { course: Course }) => {
     blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
               />
               <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-                {course.subCategoryId === "0fd2caa0-ccf4-4aa3-8f80-62f927e176c4" ? "Basmaga" : "Programming"}
+                {course.subCategoryId === "0fd2caa0-ccf4-4aa3-8f80-62f927e176c4" ? "Basmaga" :  course.subCategoryId==="39349519-412c-48f0-8f65-ff35c755a05c"? "Out Source":"programming" }
               </Badge>
             </div>
           </CardHeader>

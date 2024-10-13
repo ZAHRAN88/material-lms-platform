@@ -1,11 +1,12 @@
+import React, { Suspense } from 'react';
 import { getUserFromToken } from "@/app/actions";
 import SectionsDetails from "@/components/sections/SectionsDetails";
+import DotsLoader from "@/components/ui/dotsLoader"
 import { db } from "@/lib/db";
 import { Resource, Course, Section, Purchase, Progress, MuxData, Question } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { cache } from 'react'
 
-// Cache the course fetching
 const getCachedCourse = cache(async (courseId: string) => {
   return await db.course.findUnique({
     where: {
@@ -22,7 +23,6 @@ const getCachedCourse = cache(async (courseId: string) => {
   });
 });
 
-// Cache the section fetching
 const getCachedSection = cache(async (sectionId: string, courseId: string) => {
   return await db.section.findUnique({
     where: {
@@ -33,14 +33,12 @@ const getCachedSection = cache(async (sectionId: string, courseId: string) => {
   });
 });
 
-// Cache the resources fetching
 const getCachedResources = cache(async (sectionId: string) => {
   return await db.resource.findMany({
     where: { sectionId },
   });
 });
 
-// Cache the questions fetching
 const getCachedQuestions = cache(async (sectionId: string) => {
   return await db.question.findMany({
     where: { sectionId },
@@ -48,30 +46,21 @@ const getCachedQuestions = cache(async (sectionId: string) => {
 });
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 3600;
 
-async function SectionDetailsPage({
-  params,
-}: {
-  params: { courseId: string; sectionId: string };
-}) {
-  const { courseId, sectionId } = params;
-  const user = await getUserFromToken();
 
-  if (!user) {
-    return redirect("/sign-in");
-  }
 
+async function SectionContent({ courseId, sectionId, user }: { courseId: string, sectionId: string, user: any }) {
   const coursePromise = getCachedCourse(courseId);
   const sectionPromise = getCachedSection(sectionId, courseId);
   const resourcesPromise = getCachedResources(sectionId);
-  const questionsPromise = getCachedQuestions(sectionId); // Fetch questions
+  const questionsPromise = getCachedQuestions(sectionId);
 
   const [course, section, resources, questions] = await Promise.all([
     coursePromise,
     sectionPromise,
     resourcesPromise,
-    questionsPromise, // Include questions in the promises
+    questionsPromise,
   ]);
 
   if (!course) {
@@ -100,7 +89,7 @@ async function SectionDetailsPage({
     },
   });
 
-  const purchase = await purchasePromise;
+  const [purchase, progress] = await Promise.all([purchasePromise, progressPromise]);
 
   let muxData: MuxData | null = null;
   if (section.isFree || purchase) {
@@ -111,11 +100,9 @@ async function SectionDetailsPage({
     });
   }
 
-  const progress = await progressPromise;
-
   return (
     <SectionsDetails
-    path=""
+      path=""
       course={course}
       section={section}
       purchase={purchase}
@@ -123,6 +110,30 @@ async function SectionDetailsPage({
       resources={resources}
       progress={progress}
     />
+  );
+}
+
+async function SectionContentWrapper({ courseId, sectionId }: { courseId: string, sectionId: string }) {
+  const user = await getUserFromToken();
+
+  if (!user) {
+    return redirect("/sign-in");
+  }
+
+  return <SectionContent courseId={courseId} sectionId={sectionId} user={user} />;
+}
+
+function SectionDetailsPage({
+  params,
+}: {
+  params: { courseId: string; sectionId: string };
+}) {
+  const { courseId, sectionId } = params;
+  
+  return (
+    <Suspense fallback={<DotsLoader />}>
+      <SectionContentWrapper courseId={courseId} sectionId={sectionId} />
+    </Suspense>
   );
 }
 
