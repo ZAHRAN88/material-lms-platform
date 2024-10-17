@@ -5,36 +5,16 @@ import { db } from "../lib/db"
 import { compare } from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from 'next/headers';
-import { Question, Course, User, Level, Category } from "@prisma/client";
-import { cache } from 'react';
+import { Question } from "@prisma/client"; // Import Question model
 
-// Cache frequently used database queries
-const getCachedUser = cache(async (email: string) => {
-    return await db.user.findUnique({ 
-        where: { email },
-        select: {
-            id: true,
-            email: true,
-            password: true,
-            name: true,
-            role: true
-        }
-    });
-});
-
-// Optimized to use a single query
 const buyCourse = async (formData: FormData) => {
-    const customerId = formData.get('customerId') as string;
-    const courseId = formData.get('courseId') as string;
-    
-    return await db.$transaction(async (tx) => {
-        const purchase = await tx.purchase.create({
-            data: { customerId, courseId }
-        });
-        return purchase;
-    });
+   await db.purchase.create({
+        data:{
+            customerId: formData.get('customerId') as string,
+            courseId: formData.get('courseId') as string
+        }
+    })
 }
-
 type Engineer = {
     id: string;
     day: string;
@@ -43,228 +23,203 @@ type Engineer = {
     name: string;
     times: Time[];
 }
-
-// Optimized to use transaction and single query
 const addEngineer = async (formData: FormData): Promise<Engineer> => {
-    return await db.$transaction(async (tx) => {
-        const engineer = await tx.engineer.create({
-            data: {
-                name: formData.get('name') as string,
-                times: {
-                    create: {
-                        day: formData.get('day') as string,
-                        time: formData.get('time') as string,
-                        place: formData.get('place') as string
-                    }
+    const engineer = await db.engineer.create({
+        data: {
+            name: formData.get('name') as string,
+            times: {
+                create: {
+                    day: formData.get('day') as string,
+                    time: formData.get('time') as string,
+                    place: formData.get('place') as string
                 }
-            },
-            include: { times: true }
-        });
-
-        return {
-            id: engineer.id,
-            name: engineer.name,
-            day: engineer.times[0].day,
-            time: engineer.times[0].time,
-            place: engineer.times[0].place,
-            times: engineer.times
-        };
+            }
+        },
+        include: { times: true } 
     });
-}
 
+    return {
+        id: engineer.id,
+        name: engineer.name,
+        day: engineer.times[0].day,
+        time: engineer.times[0].time,
+        place: engineer.times[0].place,
+        times: engineer.times
+    };
+}
 type Time = {
     day: string;
     time: string;
     place: string;
 }
-
 const addTimesToEngineer = async (formData: FormData): Promise<Time> => {
-    return await db.$transaction(async (tx) => {
-        return await tx.timeSlot.create({
-            data: {
-                engineerId: formData.get('engineerId') as string,
-                day: formData.get('day') as string,
-                time: formData.get('time') as string,
-                place: formData.get('place') as string
-            }
-        });
+    const newTime = await db.timeSlot.create({
+        data: {
+            engineerId: formData.get('engineerId') as string,
+            day: formData.get('day') as string,
+            time: formData.get('time') as string,
+            place: formData.get('place') as string
+        }
     });
+    return newTime;
 }
-// Optimized signup with better error handling and single transaction
 const signUp = async (name: string, email: string, password: string) => {
-    return await db.$transaction(async (tx) => {
-        const existingUser = await tx.user.findUnique({ 
-            where: { email },
-            select: { id: true }
-        });
+	try {
+		const existingUser = await db.user.findUnique({ where: { email } });
+		if (existingUser) {
+			return { success: false, error: 'Email already in use' };
+		}
 
-        if (existingUser) {
-            return { success: false, error: 'Email already in use' };
-        }
+		const hashedPassword = await bcrypt.hash(password, 10);
+		const user = await db.user.create({
+			data: {
+				name,
+				email,
+				password: hashedPassword,
+				role: 'USER'  
+			}
+		});
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await tx.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                role: 'USER'
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true
-            }
-        });
-
-        return { success: true, user };
-    }).catch(error => {
-        console.error('Sign up error:', error);
-        return { success: false, error: 'An error occurred during sign up' };
-    });
+		return { 
+			success: true, 
+			user: { 
+				id: user.id, 
+				name: user.name, 
+				email: user.email,
+				role: user.role
+			} 
+		};
+	} catch (error) {
+		console.error('Sign up error:', error);
+		return { success: false, error: 'An error occurred during sign up' };
+	}
 }
-
-// Cached token verification
-const verifyToken = cache(async (token: string) => {
-    const { payload } = await jwtVerify(
-        token,
-        new TextEncoder().encode(process.env.JWT_SECRET!)
-    );
-    return payload;
-});
-
 export async function signIn(email: string, password: string) {
-    try {
-        const user = await getCachedUser(email);
-        
-        if (!user || !(await compare(password, user.password))) {
-            return { success: false, error: 'Invalid email or password' };
-        }
+	try {
+		const user = await db.user.findUnique({ where: { email } });
+		if (!user) {
+			return { success: false, error: 'Invalid email or password' };
+		}
 
-        const token = await new SignJWT({ userId: user.id })
-            .setProtectedHeader({ alg: 'HS256' })
-            .setExpirationTime('1d')
-            .sign(new TextEncoder().encode(process.env.JWT_SECRET));
+		const isPasswordValid = await compare(password, user.password);
+		if (!isPasswordValid) {
+			return { success: false, error: 'Invalid email or password' };
+		}
 
-        cookies().set('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 86400,
-            path: '/',
-        });
+		
+		const token = await new SignJWT({ userId: user.id })
+			.setProtectedHeader({ alg: 'HS256' })
+			.setExpirationTime('1d')
+			.sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
-        return { 
-            success: true, 
-            user: { 
-                id: user.id, 
-                name: user.name, 
-                email: user.email 
-            } 
-        };
-    } catch (error) {
-        console.error('Sign in error:', error);
-        return { success: false, error: 'An error occurred during sign in' };
-    }
+		
+		cookies().set('token', token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'strict',
+			maxAge: 86400, 
+			path: '/',
+		});
+
+		return { success: true, user: { id: user.id, name: user.name, email: user.email } };
+	} catch (error) {
+		console.error('Sign in error:', error);
+		return { success: false, error: 'An error occurred during sign in' };
+	}
 }
+export {buyCourse , addEngineer , addTimesToEngineer , signUp }
 
-// Optimized to cache user data
-export const getUserFromToken = cache(async () => {
-    const token = cookies().get('token')?.value;
-    if (!token) return null;
+export async function getUserFromToken() {
+	const token = cookies().get('token')?.value;
+	
+	if (!token) return null;
+	try {
+		const { payload } = await jwtVerify(
+			token,
+			new TextEncoder().encode(process.env.JWT_SECRET!)
+		);
+		const userId = payload.userId as string;
 
-    try {
-        const payload = await verifyToken(token);
-        const userId = payload.userId as string;
+		const user = await db.user.findUnique({
+			where: { id: userId },
+			select: { id: true, name: true, email: true, role: true }
+		});
 
-        return await db.user.findUnique({
-            where: { id: userId },
-            select: { 
-                id: true, 
-                name: true, 
-                email: true, 
-                role: true 
-            }
-        });
-    } catch (error) {
-        console.error('Failed to verify token:', error);
-        return null;
-    }
-});
+		if (!user) return null;
+
+		return {
+			id: user.id,
+			name: user.name,
+			email: user.email,
+			role: user.role
+		};
+	} catch (error) {
+		console.error('Failed to verify token:', error);
+		return null;
+	}
+}
 
 export async function signOut() {
-    cookies().delete('token');
-    return { success: true };
+	cookies().delete('token');
+	return { success: true };
 }
 
-// Optimized to use efficient includes and select
 export async function getInstructorCourses(instructorId: string) {
-    return db.course.findMany({
-        where: { instructorId },
-        include: {
-            sections: {
-                include: {
-                    progress: {
-                        select: {
-                            id: true,
-                            isCompleted: true
-                        }
-                    }
-                }
-            },
-            purchases: {
-                select: {
-                    id: true,
-                    createdAt: true
-                }
-            }
-        }
-    });
+	return db.course.findMany({
+		where: { instructorId },
+		include: {
+			sections: {
+				include: {
+					progress: true
+				}
+			},
+			purchases: true
+		}
+	});
 }
 
-// Cached community query
-export const getCommunities = cache(async () => {
-    return db.community.findMany({
-        include: {
-            _count: {
-                select: { members: true }
-            }
-        }
-    });
-});
 
-// Cached recent discussions
-export const getRecentDiscussions = cache(async () => {
-    return db.discussion.findMany({
-        take: 10,
-        orderBy: { createdAt: 'desc' },
-        include: {
-            author: {
-                select: { name: true }
-            }
-        }
-    });
-});
+export async function getCommunities() {
+	return db.community.findMany({
+		include: {
+			_count: {
+				select: { members: true }
+			}
+		}
+	});
+}
+
+export async function getRecentDiscussions() {
+	return db.discussion.findMany({
+		take: 10,
+		orderBy: { createdAt: 'desc' },
+		include: {
+			author: {
+				select: { name: true }
+			}
+		}
+	});
+}
 
 export const updateEngineer = async (id: string, name: string) => {
-    return await db.$transaction(async (tx) => {
-        return await tx.engineer.update({
-            where: { id },
-            data: { name },
-        });
+    const updatedEngineer = await db.engineer.update({
+        where: { id },
+        data: { name },
     });
+    return updatedEngineer;
 };
 
 export const updateTimeSlot = async (id: string, day: string, time: string, place: string) => {
-    return await db.$transaction(async (tx) => {
-        return await tx.timeSlot.update({
-            where: { id },
-            data: { day, time, place },
-        });
+    const updatedTimeSlot = await db.timeSlot.update({
+        where: { id },
+        data: { day, time, place },
     });
+    return updatedTimeSlot;
 };
 
+import { Course, User, Level, Category } from "@prisma/client";
+
+// Add this new type
 type CourseWithDetails = Course & {
     instructor: User | null;
     membersCount: number;
@@ -273,104 +228,101 @@ type CourseWithDetails = Course & {
     category: Category | null;
 };
 
-// Optimized to use a single query with aggregations
-export const getCourseDetails = cache(async (courseId: string): Promise<CourseWithDetails | null> => {
-    const courseData = await db.$transaction(async (tx) => {
-        const [course, counts] = await Promise.all([
-            tx.course.findUnique({
-                where: { id: courseId },
-                include: {
-                    instructor: true,
-                    level: true,
-                    category: true,
-                    _count: {
-                        select: {
-                            purchases: true,
-                            sections: true
-                        }
-                    }
-                }
-            }),
-            tx.purchase.count({ where: { courseId } })
-        ]);
-
-        if (!course) return null;
-
-        return {
-            ...course,
-            instructor: course.instructor,
-            membersCount: counts,
-            sectionsCount: course._count.sections,
-            level: course.level,
-            category: course.category
-        };
-    });
-
-    return courseData;
-});
-
-// Cached section query
-export const getCourseWithSections = cache(async (courseId: string) => {
-    return db.section.findMany({
-        where: { courseId },
-        orderBy: { position: 'asc' }
-    });
-});
-
-// Cached course query
-export const getCourse = cache(async (courseId: string) => {
+// Add this new action
+export async function getCourseDetails(courseId: string): Promise<CourseWithDetails | null> {
     const course = await db.course.findUnique({
-        where: { id: courseId }
+        where: { id: courseId },
+        include: {
+            instructor: true,
+        },
     });
 
-    if (!course) {
-        throw new Error('Course not found');
+    if (!course) return null;
+
+    const membersCount = await db.purchase.count({ where: { courseId } });
+    const sectionsCount = await db.section.count({ where: { courseId } });
+    const level = course.levelId ? await db.level.findUnique({ where: { id: course.levelId } }) : null;
+    const category = course.categoryId ? await db.category.findUnique({ where: { id: course.categoryId } }) : null;
+
+    return {
+        ...course,
+        instructor: course.instructor,
+        membersCount,
+        sectionsCount,
+        level,
+        category,
+    };
+}
+
+
+export const getCourseWithSections = async (courseId: string) => {
+  const sections = await db.section.findMany({
+    where: {
+      courseId: courseId
+    },
+    orderBy: {
+      position: 'asc'
     }
+  });
 
-    return course;
-});
+  return sections;
+};
+export async function getCourse(courseId: string) {
+	try {
+	  const course = await db.course.findUnique({
+		where: { id: courseId },
+	  });
+  
+	  if (!course) {
+		throw new Error('Course not found');
+	  }
+  
+	  return course;
+	} catch (error) {
+	  console.error('Failed to fetch course:', error);
+	  throw error;
+	}
+  }
+  export async function getLevelName(courseId: string): Promise<string | null> {
+	const course = await db.course.findUnique({
+	  where: { id: courseId },
+	  select: { level: { select: { name: true } } },
+	});
+	return course?.level?.name ?? null;
+  }
+  
+  export async function getInstructorName(courseId: string): Promise<string | null> {
+	const course = await db.course.findUnique({
+	  where: { id: courseId },
+	  select: { instructor: { select: { name: true } } },
+	});
+	return course?.instructor?.name ?? null;
+  }
 
-// Cached level name query
-export const getLevelName = cache(async (courseId: string): Promise<string | null> => {
-    const course = await db.course.findUnique({
-        where: { id: courseId },
-        select: { level: { select: { name: true } } }
-    });
-    return course?.level?.name ?? null;
-});
-
-// Cached instructor name query
-export const getInstructorName = cache(async (courseId: string): Promise<string | null> => {
-    const course = await db.course.findUnique({
-        where: { id: courseId },
-        select: { instructor: { select: { name: true } } }
-    });
-    return course?.instructor?.name ?? null;
-});
-
+// Add this new action
 export const addQuestionToSection = async (formData: FormData, sectionId: string): Promise<Question> => {
-    return await db.$transaction(async (tx) => {
-        return await tx.question.create({
-            data: {
-                answer: formData.get('answer') as string,
-                sectionId: sectionId,
-                text: formData.get('question') as string
-            }
-        });
+    const questionText = formData.get('question') as string;
+    const questionAns = formData.get('answer') as string;
+	
+    const question = await db.question.create({
+        data: {
+            answer: questionAns, 
+            sectionId: sectionId,
+            text: questionText 
+        },
     });
+
+    return question;
 };
 
 export const deleteTimeSlot = async (id: string) => {
     try {
-        return await db.$transaction(async (tx) => {
-            await tx.timeSlot.delete({
-                where: { id }
-            });
-            return { success: true };
+        await db.timeSlot.delete({
+            where: { id },
         });
+        return { success: true };
     } catch (error) {
         console.error('Failed to delete time slot:', error);
         return { success: false, error: 'An error occurred while deleting the time slot' };
     }
 };
-export{addEngineer,addTimesToEngineer,buyCourse,signUp}
