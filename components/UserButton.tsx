@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { signOut } from '@/app/actions';
 import { useRouter } from 'next/navigation';
@@ -18,23 +18,28 @@ import {
 export function UserButton() {
   const { user, setUser } = useAuth();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     setUser(null);
     router.push('/');
-  };
+  }, [setUser, router]);
+
+  const handleProfileClick = useCallback(() => {
+    router.push('/profile');
+  }, [router]);
+
+  const userInitial = useMemo(() => user?.name.charAt(0).toUpperCase() ?? '', [user]);
 
   if (!user) return null;
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full" aria-label="User menu">
           <Avatar className="h-8 w-8">
             <AvatarImage src="/avatars/01.png" alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{userInitial}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -48,12 +53,10 @@ export function UserButton() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
-        
-        <DropdownMenuItem onClick={() => router.push('/profile')}>
+        <DropdownMenuItem onSelect={handleProfileClick}>
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSignOut}>
+        <DropdownMenuItem onSelect={handleSignOut}>
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
