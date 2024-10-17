@@ -14,7 +14,7 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMotionValue, useTransform, animate } from "framer-motion";
@@ -23,9 +23,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useTheme } from "next-themes";
@@ -41,91 +38,77 @@ const Topbar: React.FC<TopbarProps> = ({ isAdmin }) => {
   const pathName = usePathname();
   const { theme } = useTheme();
 
-  const topRoutes = [
-    { label: "Instructor", path: "/instructor/courses" },
-  ];
-
-  const sidebarRoutes = [
-    { label: "Courses", path: "/instructor/courses" },
-    {
-      label: "Performance",
-      path: "/instructor/performance",
-    },
-  ];
-
-  const links = [
+  const links = useMemo(() => [
     {
       href: "/mwaead",
       key: "/mwaead",
       icon: <TimerIcon className="h-4 w-4" />,
       label: "mwaead",
     },
-    
-  ];
+  ], []);
+
+  const sidebarRoutes = useMemo(() => [
+    { label: "Courses", path: "/instructor/courses" },
+    { label: "Performance", path: "/instructor/performance" },
+  ], []);
 
   const [searchInput, setSearchInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 15) {
-      setSearchInput(value);
-    }
-  };
-
-  const handleSearch = async () => {
-    if (searchInput.trim() !== "") {
-      setIsLoading(true);
-      try {
-        // Simulate API call with setTimeout
-        await new Promise(resolve => setTimeout(resolve, 400));
-        router.push(`/search?query=${searchInput}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
-  };
-
   const [isExpanded, setIsExpanded] = useState(false);
   const width = useMotionValue(40);
   const padding = useTransform(width, [40, 300], [0, 16]);
 
-  const expandSearch = () => {
+  const handleSearchInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value.slice(0, 15));
+  }, []);
+
+  const handleSearch = useCallback(async () => {
+    if (searchInput.trim() !== "") {
+      setIsLoading(true);
+      try {
+        await new Promise(resolve => setTimeout(resolve, 400));
+        router.push(`/search?query=${encodeURIComponent(searchInput.trim())}`);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [searchInput, router]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  }, [handleSearch]);
+
+  const expandSearch = useCallback(() => {
     setIsExpanded(true);
     animate(width, 300);
-  };
+  }, []);
 
-  const collapseSearch = () => {
+  const collapseSearch = useCallback(() => {
     if (searchInput === "") {
       setIsExpanded(false);
       animate(width, 30);
     }
-  };
+  }, [searchInput]);
 
   return (
-    <div className="flex items-center p-4">
+    <nav className="flex items-center p-4  shadow-sm">
       <div className="flex items-center flex-1">
-        <Link className="flex justify-center items-center" href="/">
+        <Link href="/" className="flex items-center">
           <Image
-            src={`${theme == "dark" ? "/logoD.png" : "/logo.png"}`}
+            src={theme === "dark" ? "/logoD.png" : "/logo.png"}
             height={32}
             width={80}
             alt="logo"
             loading="lazy"
             placeholder="blur"
-blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
-         
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
           />
         </Link>
 
         <motion.div 
-          className="max-md:hidden flex ml-4 rounded-full overflow-hidden bg-[#9aabbda1]"
+          className="max-md:hidden flex ml-4 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700"
           style={{ width }}
         >
           <AnimatePresence>
@@ -134,7 +117,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex-grow bg-transparent border-none outline-none text-sm"
+                className="flex-grow bg-transparent border-none outline-none text-sm px-3"
                 placeholder="Search (max 15 chars)"
                 value={searchInput}
                 onChange={handleSearchInputChange}
@@ -146,7 +129,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
             )}
           </AnimatePresence>
           <motion.button
-            className="bg-[#003285] text-white border-none outline-none cursor-pointer p-2 hover:bg-[#003285]/80 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-blue-600 text-white border-none outline-none cursor-pointer p-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={isExpanded ? handleSearch : expandSearch}
             onBlur={collapseSearch}
             whileHover={{ scale: 1.05 }}
@@ -168,7 +151,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/development"
-                className="text-sm font-medium hover:text-[#003285] dark:hover:text-slate-200"
+                className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 Development Link
               </Link>
@@ -178,7 +161,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/instructor/courses"
-                className="text-sm font-medium dark:hover:text-slate-200 hover:text-[#003285]"
+                className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 Admin
               </Link>
@@ -201,7 +184,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
               >
                 <Link
                   href={href}
-                  className="text-sm font-medium hover:text-[#003285] dark:hover:text-slate-200"
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   <div className="flex items-center justify-start">
                     {icon && icon}
@@ -227,12 +210,12 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
             <SheetTrigger className="flex items-center justify-center">
               <Menu className="w-5 h-5" />
             </SheetTrigger>
-            <SheetContent className="flex flex-col gap-4 ">
+            <SheetContent className="flex flex-col gap-4">
               <div className="flex flex-col gap-4 py-4">
                 {isAdmin && (
                   <Link
                     href="/instructor/courses"
-                    className="text-sm font-medium hover:text-[#003285] flex justify-between items-center"
+                    className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 flex justify-between items-center transition-colors"
                   >
                     Admin
                     <ChevronRight className="h-4 w-4" />
@@ -241,7 +224,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
                 
                 <Link
                   href="/mwaead"
-                  className="text-sm font-medium hover:text-[#003285] flex justify-between items-center"
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 flex justify-between items-center transition-colors"
                 >
                   <div className="flex items-center">
                     <TimerIcon className="w-5 h-5" />
@@ -257,7 +240,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
                     <Link
                       href={route.path}
                       key={route.path}
-                      className="text-sm font-medium hover:text-[#003285] flex justify-between items-center"
+                      className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 flex justify-between items-center transition-colors"
                     >
                       {route.label}
                       <ChevronRight className="h-4 w-4" />
@@ -269,7 +252,7 @@ blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
           </Sheet>
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 
