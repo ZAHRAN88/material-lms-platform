@@ -90,7 +90,6 @@ const addTimesToEngineer = async (formData: FormData): Promise<Time> => {
         });
     });
 }
-
 // Optimized signup with better error handling and single transaction
 const signUp = async (name: string, email: string, password: string) => {
     return await db.$transaction(async (tx) => {
@@ -374,3 +373,4 @@ export const deleteTimeSlot = async (id: string) => {
         return { success: false, error: 'An error occurred while deleting the time slot' };
     }
 };
+export{addEngineer,addTimesToEngineer,buyCourse,signUp}
