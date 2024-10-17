@@ -41,7 +41,6 @@ interface CourseOverviewClientProps {
   levelName: string | null;
   instructorName: string | null;
   progress:number
-  completedSections:number
 }
 
 export default function CourseOverviewClient({ 
