@@ -10,7 +10,7 @@ import {
 } from "@prisma/client";
 import toast from "react-hot-toast";
 import { useCallback, useEffect, useState } from "react";
-import { File, Lock, BookOpen, Clock, Award, ChevronRight } from "lucide-react";
+import { File, Lock, BookOpen, Clock, Award, ChevronRight, PlayCircle, Medal } from "lucide-react";
 import Link from "next/link";
 import ProgressButton from "./ProgressButton";
 import SectionMenu from "../layout/SectionMenu";
@@ -24,7 +24,6 @@ import { Suspense } from "react";
 import ReadText from "../custom/ReadText";
 import { useAuth } from "@/lib/AuthContext";
 import { enrollCourse } from "@/lib/actions";
-import { Tree, Folder, File as FileTree } from "@/components/magicui/file-tree";
 import {
   Card,
   CardContent,
@@ -37,6 +36,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
+import Image from "next/image";
 
 const LoadingSkeleton = () => (
   <div className="px-6 py-4 flex flex-col gap-5 animate-pulse">
@@ -78,7 +78,28 @@ const ResourceCard = ({ resource }: { resource: Resource }) => (
   <Link href={resource.fileUrl} target="_blank">
     <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
       <CardHeader className="flex flex-row items-center gap-4">
-        <File className="h-8 w-8 text-blue-500" />
+        {
+          resource.name.includes("Video")?<>
+          <PlayCircle/>
+          </>: resource.name.includes("Hagag")? <>
+          <><Medal color="#ffe042" /></>
+          </>:<>
+
+          { resource.fileUrl.includes("drive")?<>
+          
+          <Image
+          src={"/drive.png"}
+          alt="drive icon"
+          width={40}
+          height={40}
+          />
+
+          </>:
+
+            <File/>
+            }
+          </>
+        }
         <div>
           <CardTitle className="text-lg">{resource.name}</CardTitle>
           <CardDescription>
