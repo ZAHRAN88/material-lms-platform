@@ -1,27 +1,42 @@
+import React from "react";
 import { db } from "@/lib/db";
 import { Course, Section } from "@prisma/client";
 import Link from "next/link";
 import { Progress } from "../ui/progress";
 import { MotionDiv } from "../MotionDiv";
-import { cn } from "@/lib/utils"; // Assuming you have a utility function for class names
+import { cn } from "@/lib/utils";
+import { BookOpen, CheckCircle, LayoutDashboard } from "lucide-react";
 
 interface CourseSideBarProps {
   course: Course & { sections: Section[] };
   studentId: string;
+  currentSectionId?: string;
 }
 
-const CourseSideBar = async ({ course, studentId }: CourseSideBarProps) => {
+export const calculateProgressPercentage = async (courseId: string, studentId: string) => {
   const publishedSections = await db.section.findMany({
-    where: {
-      courseId: course.id,
-      isPublished: true,
-    },
-    orderBy: {
-      position: "asc",
-    },
+    where: { courseId: courseId, isPublished: true },
+    orderBy: { position: "asc" },
   });
 
   const publishedSectionIds = publishedSections.map((section) => section.id);
+
+  const completedSections = await db.progress.count({
+    where: {
+      studentId,
+      sectionId: { in: publishedSectionIds },
+      isCompleted: true,
+    },
+  });
+
+  return (completedSections / publishedSectionIds.length) * 100;
+};
+
+const CourseSideBar = async ({ course, studentId, currentSectionId }: CourseSideBarProps) => {
+  const publishedSections = await db.section.findMany({
+    where: { courseId: course.id, isPublished: true },
+    orderBy: { position: "asc" },
+  });
 
   const purchase = await db.purchase.findUnique({
     where: {
@@ -32,61 +47,75 @@ const CourseSideBar = async ({ course, studentId }: CourseSideBarProps) => {
     },
   });
 
-  const completedSections = await db.progress.count({
+  const progressPercentage = await calculateProgressPercentage(course.id, studentId);
+
+  const completedSections = await db.progress.findMany({
     where: {
       studentId,
-      sectionId: {
-        in: publishedSectionIds,
-      },
+      sectionId: { in: publishedSections.map(s => s.id) },
       isCompleted: true,
     },
   });
 
-  const progressPercentage =
-    (completedSections / publishedSectionIds.length) * 100;
+  const completedSectionIds = new Set(completedSections.map(s => s.sectionId));
 
   return (
-    <MotionDiv
-      initial={{ opacity: 0, x: -100 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, delay: 0.5, damping: 10, stiffness: 100, type: "spring" }}
-      className="hidden md:flex flex-col h-screen w-64 border border-gray-200 dark:border-gray-700 shadow-lg p-5 my-4 rounded-md text-sm font-medium bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-    >
-      <h1 className="text-lg font-bold text-center mb-4">{course.title}</h1>
-      {purchase && (
-        <div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">{Math.round(progressPercentage)}% completed</p>
-          <Progress value={progressPercentage} className="h-3 mt-2" />
-        </div>
-      )}
-      <Link
-        href={`/courses/${course.id}/overview`}
-        className={cn(
-          "p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 my-4",
-          "transition-colors duration-200"
+    <div className="h-screen border-r flex flex-col rounded-md shadow-sm bg-gray-50 dark:bg-slate-800">
+      <div className="p-8 flex flex-col border-b dark:border-gray-700 text-gray-700">
+        <h1 className="font-bold text-2xl text-gray-800 dark:text-gray-500 mb-4">
+          {course.title}
+        </h1>
+        {purchase && (
+          <div className="mt-4">
+            <Progress
+              value={progressPercentage}
+              className="h-2"
+            />
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">
+              {Math.round(progressPercentage)}% completed
+            </p>
+          </div>
         )}
-      >
-        Overview
-      </Link>
-      {publishedSections.map((section, index) => (
+      </div>
+      <nav className="flex flex-col w-full p-4 space-y-2">
         <Link
-          key={section.id}
-          href={`/courses/${course.id}/sections/${section.id}`}
+          href={`/courses/${course.id}/overview`}
+          className={cn(
+            "flex items-center gap-x-2 text-gray-700 dark:text-gray-300 text-sm font-medium p-3 rounded-lg transition-all hover:bg-gray-200 dark:hover:bg-gray-700",
+            currentSectionId === undefined && "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 font-semibold"
+          )}
         >
-          <MotionDiv 
-            initial={{ opacity: 0, x: -100 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut", delay: index * 0.3 }}
-            className={cn(
-              "p-3 w-full rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mt-4",
-              "transition-colors duration-200"
-            )}
-          >
-            {section.title}
-          </MotionDiv>
+          <LayoutDashboard size={20} />
+          Overview
         </Link>
-      ))}
-    </MotionDiv>
+        {publishedSections.map((section) => (
+          <MotionDiv
+            key={section.id}
+            className="w-full"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Link
+              href={`/courses/${course.id}/sections/${section.id}`}
+              className={cn(
+                "flex items-center gap-x-2 text-gray-700 dark:text-gray-300 text-sm font-medium p-3 rounded-lg transition-all hover:bg-gray-200 dark:hover:bg-gray-700",
+                currentSectionId === section.id && "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 font-semibold shadow-md"
+              )}
+            >
+              {completedSectionIds.has(section.id) ? (
+                <CheckCircle size={20} className="text-green-500 dark:text-green-400" />
+              ) : (
+                <BookOpen size={20} className={cn(
+                  currentSectionId === section.id ? "text-blue-600 dark:text-blue-300" : "text-gray-500 dark:text-gray-400"
+                )} />
+              )}
+              {section.title}
+            </Link>
+          </MotionDiv>
+        ))}
+      </nav>
+    </div>
   );
 };
 

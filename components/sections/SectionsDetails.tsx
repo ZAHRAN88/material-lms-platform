@@ -10,42 +10,97 @@ import {
 } from "@prisma/client";
 import toast from "react-hot-toast";
 import { useCallback, useEffect, useState } from "react";
-import { File, Lock } from "lucide-react";
+import { File, Lock, BookOpen, Clock, Award, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import ProgressButton from "./ProgressButton";
 import SectionMenu from "../layout/SectionMenu";
-import { buyCourse } from "@/app/actions";
 import { useRouter } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import Spinner from "./Spinner";
 import { MotionDiv, MotionH1 } from "../MotionDiv";
 import Confetti from "confetti-react";
-
 import useWindowSize from "react-use/lib/useWindowSize";
 import { Button } from "../ui/button";
-
 import { Suspense } from "react";
 import ReadText from "../custom/ReadText";
 import { useAuth } from "@/lib/AuthContext";
 import { enrollCourse } from "@/lib/actions";
-import { Progress } from "../ui/progress";
-import { Tree, Folder, File as FileTree } from "@/components/magicui/file-tree"; // Import Tree components
+import { Tree, Folder, File as FileTree } from "@/components/magicui/file-tree";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 const LoadingSkeleton = () => (
   <div className="px-6 py-4 flex flex-col gap-5 animate-pulse">
-    <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-      <div className="h-8 bg-gray-200 w-3/4 mb-4"></div>
-      <div className="flex gap-4">
-        <div className="h-10 w-24 bg-gray-200 rounded-md"></div>
-        <div className="h-10 w-32 bg-gray-200 rounded-md"></div>
-      </div>
-    </div>
-    <div className="h-20 bg-gray-200 w-full"></div>
-    <div>
-      <div className="h-6 bg-gray-200 w-1/4 mb-5"></div>
+    <div className="h-40 bg-gray-100 rounded-xl mb-6"></div>
+    <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-12 bg-gray-200 w-full mb-4 rounded-lg"></div>
+        <div key={i} className="flex gap-4">
+          <div className="h-20 w-1/4 bg-gray-100 rounded-lg"></div>
+          <div className="h-20 w-3/4 bg-gray-100 rounded-lg"></div>
+        </div>
       ))}
+    </div>
+  </div>
+);
+
+const StatusBadge = ({ status }: { status: "locked" | "free" | "enrolled" }) => {
+  const styles = {
+    locked: "bg-red-100 text-red-800 border-red-200",
+    free: "bg-green-100 text-green-800 border-green-200",
+    enrolled: "bg-blue-100 text-blue-800 border-blue-200",
+  };
+
+  const labels = {
+    locked: "Locked",
+    free: "Free",
+    enrolled: "Enrolled",
+  };
+
+  return (
+    <span
+      className={`px-3 py-1 text-sm font-medium rounded-full border ${styles[status]}`}
+    >
+      {labels[status]}
+    </span>
+  );
+};
+
+const ResourceCard = ({ resource }: { resource: Resource }) => (
+  <Link href={resource.fileUrl} target="_blank">
+    <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+      <CardHeader className="flex flex-row items-center gap-4">
+        <File className="h-8 w-8 text-blue-500" />
+        <div>
+          <CardTitle className="text-lg">{resource.name}</CardTitle>
+          <CardDescription>
+            {  "Additional resource"}
+          </CardDescription>
+        </div>
+      </CardHeader>
+    </Card>
+  </Link>
+);
+
+const CourseProgress = ({ progress }: { progress: number }) => (
+  <div className="w-full space-y-2">
+    <div className="flex justify-between text-sm text-gray-600">
+      <span>Course Progress</span>
+      <span>{progress}%</span>
+    </div>
+    <div className="h-2 bg-gray-200 rounded-full">
+      <div
+        className="h-full bg-blue-500 rounded-full transition-all duration-500"
+        style={{ width: `${progress}%` }}
+      ></div>
     </div>
   </div>
 );
@@ -69,11 +124,12 @@ const SectionsDetails = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [runConfetti, setRunConfetti] = useState(false);
+  const [optimisticEnrollment, setOptimisticEnrollment] = useState(false);
   const { width, height } = useWindowSize();
   const router = useRouter();
   const { user } = useAuth();
 
-  const isPurchased = purchase?.customerId === user?.id;
+  const isPurchased = optimisticEnrollment || purchase?.customerId === user?.id;
   const isLocked = !purchase && !section.isFree;
 
   const handleEnrollment = useCallback(async () => {
@@ -84,20 +140,24 @@ const SectionsDetails = ({
     }
 
     setIsLoading(true);
+    setOptimisticEnrollment(true);
+
     try {
       const formData = new FormData();
       formData.append('courseId', course.id);
 
       const result = await enrollCourse(formData);
       if (result.success) {
-        toast.success(result.message || 'Enrollment successful');
+        toast.success(result.message || 'Successfully enrolled in the course!');
         setRunConfetti(true);
         router.refresh();
         setTimeout(() => setRunConfetti(false), 3000);
       } else {
-        toast.error(result.error || "An error occurred during enrollment");
+        setOptimisticEnrollment(false);
+        toast.error(result.error || "Failed to enroll in the course");
       }
     } catch (error) {
+      setOptimisticEnrollment(false);
       console.error("Enrollment error:", error);
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
@@ -111,90 +171,115 @@ const SectionsDetails = ({
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
-  console.log(resources)
-
   return (
     <Suspense fallback={<LoadingSkeleton />}>
       {section ? (
-        <div className="px-6 py-4 flex flex-col gap-5">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-            <MotionH1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-2xl font-bold max-md:mb-4"
-            >
-              {section.title}
-            </MotionH1>
-
-            <div className="flex gap-4">
-              <SectionMenu course={course} />
-              {!isPurchased ? (
-                <Button
-                  onClick={handleEnrollment}
-                  disabled={isLoading}
-                  className="outline-none bg-slate-800 p-4 rounded-md text-white"
-                >
-                  {isLoading ? (
-                    <>
-                      Enrolling.. <Spinner />
-                    </>
-                  ) : (
-                    "Enroll Course"
-                  )}
-                </Button>
-              ) : (
-                <ProgressButton
-                  courseId={course.id}
-                  sectionId={section.id}
-                  isCompleted={!!progress?.isCompleted}
-                />
-              )}
-            </div>
-          </div>
-
-          <ReadText value={section.description || ""} />
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header Section */}
           <MotionDiv
-            initial={{ opacity: 0, y: 100 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5, damping: 10, stiffness: 100, type: "spring" }}
+            className="bg-white dark:bg-[#020817] dark:text-white rounded-xl shadow-sm p-6 mb-8"
           >
-            <Tree
-              className="p-3 overflow-hidden rounded-md bg-background"
-              initialSelectedId="1"
-              initialExpandedItems={["1"]}
-              elements={[
-                {
-                  id: "1",
-                  isSelectable: false,
-                  name: "Resources",
-                  children: resources.map((resource) => ({
-                    id: resource.id,
-                    isSelectable: true,
-                    name: resource.name,
-                    fileUrl: resource.fileUrl,
-                  })),
-                },
-              ]}
-            >
-              <Folder className="text-xl font-semibold" element="Resources" value="1">
-                {  resources.map((resource) => (
-                  <FileTree key={resource.id} value={resource.id}>
-                    <Link
-                      href={resource.fileUrl}
-                      target="_blank"
-                      className="flex items-center py-1  my-1 bg-[#9aabbda1] rounded-lg text-sm font-medium p-3"
-                    >
-                      {resource.name}
-                    </Link>
-                  </FileTree>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <StatusBadge
+                    status={
+                      isPurchased ? "enrolled" : section.isFree ? "free" : "locked"
+                    }
+                  />
+                  <span className="text-sm text-gray-500">
+                    Section {section.position+1} of {course.sections.length}
+                  </span>
+                </div>
+                <h1 className="text-3xl font-bold ">
+                  {section.title}
+                </h1>
+              </div>
+
+              <div className="flex gap-3">
+                <SectionMenu course={course} />
+                {!isPurchased ? (
+                  <Button
+                    onClick={handleEnrollment}
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg
+                             transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Spinner />
+                        <span>Enrolling...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        <span>Enroll Now</span>
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <ProgressButton
+                    courseId={course.id}
+                    sectionId={section.id}
+                    isCompleted={!!progress?.isCompleted}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Course Progress */}
+         
+          </MotionDiv>
+
+          {/* Description Section */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold">
+                Section Notes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className={`${!section.description?"text-center text-gray-400 text-xl font-bold ":""}`}>
+              <ReadText value={section.description || "No Notes For this Section"} />
+            </CardContent>
+          </Card>
+
+          {/* Resources Section */}
+          <MotionDiv
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-semibold  mb-4">
+              Section Resources
+            </h2>
+            
+            {resources.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {resources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} />
                 ))}
-              </Folder>
-            </Tree>
+              </div>
+            ) : (
+              <Alert>
+                <AlertTitle>No resources available</AlertTitle>
+                <AlertDescription>
+                  This section does not have any resources yet. Check back later!
+                </AlertDescription>
+              </Alert>
+            )}
           </MotionDiv>
 
           {runConfetti && (
-            <Confetti width={width} height={height} numberOfPieces={100} />
+            <Confetti
+              width={width}
+              height={height}
+              numberOfPieces={200}
+              recycle={false}
+              colors={['#60A5FA', '#3B82F6', '#2563EB', '#1D4ED8']}
+            />
           )}
         </div>
       ) : (

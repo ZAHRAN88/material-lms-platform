@@ -326,3 +326,4 @@ export const deleteTimeSlot = async (id: string) => {
         return { success: false, error: 'An error occurred while deleting the time slot' };
     }
 };
+

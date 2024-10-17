@@ -38,7 +38,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange={true}
           >
-            <SiteBlob/>
+            {/* <SiteBlob/> */}
             <OnlineStatus />
             <ScrollRange />
             {children}

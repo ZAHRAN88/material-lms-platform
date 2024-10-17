@@ -1,11 +1,20 @@
-import React, { Suspense } from 'react';
+import React, { Suspense } from "react";
 import { getUserFromToken } from "@/app/actions";
 import SectionsDetails from "@/components/sections/SectionsDetails";
-import DotsLoader from "@/components/ui/dotsLoader"
+import DotsLoader from "@/components/ui/dotsLoader";
 import { db } from "@/lib/db";
-import { Resource, Course, Section, Purchase, Progress, MuxData, Question } from "@prisma/client";
+import {
+  Resource,
+  Course,
+  Section,
+  Purchase,
+  Progress,
+  MuxData,
+  Question,
+} from "@prisma/client";
 import { redirect } from "next/navigation";
-import { cache } from 'react'
+import { cache } from "react";
+import CourseSideBar from "@/components/layout/CourseSideBar";
 
 const getCachedCourse = cache(async (courseId: string) => {
   return await db.course.findUnique({
@@ -45,12 +54,18 @@ const getCachedQuestions = cache(async (sectionId: string) => {
   });
 });
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
-
-
-async function SectionContent({ courseId, sectionId, user }: { courseId: string, sectionId: string, user: any }) {
+async function SectionContent({
+  courseId,
+  sectionId,
+  user,
+}: {
+  courseId: string;
+  sectionId: string;
+  user: any;
+}) {
   const coursePromise = getCachedCourse(courseId);
   const sectionPromise = getCachedSection(sectionId, courseId);
   const resourcesPromise = getCachedResources(sectionId);
@@ -89,7 +104,10 @@ async function SectionContent({ courseId, sectionId, user }: { courseId: string,
     },
   });
 
-  const [purchase, progress] = await Promise.all([purchasePromise, progressPromise]);
+  const [purchase, progress] = await Promise.all([
+    purchasePromise,
+    progressPromise,
+  ]);
 
   let muxData: MuxData | null = null;
   if (section.isFree || purchase) {
@@ -101,26 +119,42 @@ async function SectionContent({ courseId, sectionId, user }: { courseId: string,
   }
 
   return (
-    <SectionsDetails
-      path=""
-      course={course}
-      section={section}
-      purchase={purchase}
-      muxData={muxData}
-      resources={resources}
-      progress={progress}
-    />
+    <div className="flex  justify-center gap-6">
+      <div className="hidden sm:block">
+        
+      <CourseSideBar course={course} studentId={user.id} currentSectionId={section.id} />
+      </div>
+      <div className="flex-1">
+      <SectionsDetails
+        path=""
+        course={course}
+        section={section}
+        purchase={purchase}
+        muxData={muxData}
+        resources={resources}
+        progress={progress}
+      />
+      </div>
+    </div>
   );
 }
 
-async function SectionContentWrapper({ courseId, sectionId }: { courseId: string, sectionId: string }) {
+async function SectionContentWrapper({
+  courseId,
+  sectionId,
+}: {
+  courseId: string;
+  sectionId: string;
+}) {
   const user = await getUserFromToken();
 
   if (!user) {
     return redirect("/sign-in");
   }
 
-  return <SectionContent courseId={courseId} sectionId={sectionId} user={user} />;
+  return (
+    <SectionContent courseId={courseId} sectionId={sectionId} user={user} />
+  );
 }
 
 function SectionDetailsPage({
@@ -129,7 +163,7 @@ function SectionDetailsPage({
   params: { courseId: string; sectionId: string };
 }) {
   const { courseId, sectionId } = params;
-  
+
   return (
     <Suspense fallback={<DotsLoader />}>
       <SectionContentWrapper courseId={courseId} sectionId={sectionId} />

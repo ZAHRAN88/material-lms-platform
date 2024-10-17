@@ -50,7 +50,6 @@ const CourseDetailsLayout = async ({
       <Topbar isAdmin={isAdmin} />
       <ScrollRange />
       <div className="flex-1 flex">
-        <CourseSideBar course={course} studentId={user.id} />
         <div className="flex-1">{children}</div>
       </div>
     </div>
